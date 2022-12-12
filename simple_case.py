@@ -1,8 +1,5 @@
 # %%
-import pyshtools as pysh
-
 import numpy as np
-from scipy.special import spherical_jn
 
 from generate_f_lmn import generate_f_lmn
 from precompute_c_ln import load_c_ln_values
@@ -22,69 +19,6 @@ n_max = calculate_n_max_l(0, k_max, r_max) # There are the most modes when l=0
 c_ln_values = load_c_ln_values("c_ln.csv")
 sphericalBesselZeros = loadSphericalBesselZeros("zeros.csv")
 f_lmn = generate_f_lmn(l_max, n_max, r_max)
-
-
-def a_lm(r_i, l, m, k_max, r_max):
-    s = 0
-
-    n = 0
-    k_ln = sphericalBesselZeros[l][0] / r_max
-
-    while k_ln < k_max:
-
-        s += ((r_max)**(-3/2)) * c_ln_values[l][n] * spherical_jn(l, k_ln * r_i) * f_lmn[l][m][n]
-
-        n += 1
-        k_ln = sphericalBesselZeros[l][n] / r_max
-
-    return s
-
-
-def calcCoeffs(r_i, l_max, k_max, r_max):
-    cilm = np.zeros((2, l_max + 1, l_max + 1))
-
-    for l in range(l_max + 1):
-
-        # We don't need to supply the -ve m
-        # Since we are working with real fields
-        for m in range(l + 1):
-            coeff = a_lm(r_i, l, m, k_max, r_max)
-
-            cilm[0][l][m] = np.real(coeff)
-            cilm[1][l][m] = np.imag(coeff)
-
-
-    return cilm
-
-
-def generateFieldAtRadius(r_i, lmax_calc=None):
-    if lmax_calc == None:
-        # Default to l_max
-        lmax_calc = l_max
-
-
-    # Get the coefficients a_lm
-    # in the format required by pyshtools
-    cilm = calcCoeffs(r_i, l_max, k_max, r_max)
-    coeffs = pysh.SHCoeffs.from_array(cilm)
-
-
-    # Do the transform
-    grid = coeffs.expand(lmax_calc=lmax_calc)
-
-    return grid
-
-
-
-def plotField(grid, r_i, lmax_calc):
-
-    title = "r_i = %.2f, r_max = %.2f, k_max = %.2f, l_max = %d, lmax_calc = %d" % (r_i, r_max, k_max, l_max, lmax_calc)
-
-    # Plot the field using the Mollweide projection
-
-    fig = grid.plotgmt(projection='mollweide', colorbar='right', title=title)
-    fig.show()
-
 
 
 # %%
