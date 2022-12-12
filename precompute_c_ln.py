@@ -1,7 +1,6 @@
 # %%
 import numpy as np
 from scipy.special import jv
-import pandas as pd
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
 
 zeros = loadSphericalBesselZeros("zeros.csv")
@@ -31,17 +30,17 @@ def precompute_c_ln_values(l_max, n_max, saveFileName):
 
 
     # Save to a .csv file
-    pd.DataFrame(data=c_ln_values).to_csv(saveFileName)
+    np.savetxt(saveFileName, c_ln_values, delimiter=",")
 
     return c_ln_values
 
 
 def load_c_ln_values(fileName):
-    return pd.read_csv(fileName, index_col=0).to_numpy()
+    return np.loadtxt(fileName, delimiter=",")
 
 
 # %%
 
-c_ln_values = precompute_c_ln_values(100, 1000, "c_ln.csv")
+# c_ln_values = precompute_c_ln_values(100, 1000, "c_ln.csv")
 
 # %%

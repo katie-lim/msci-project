@@ -3,11 +3,9 @@
 
 # %%
 
-from json import load
 import numpy as np
 from scipy.optimize import root
 from scipy.special import spherical_jn
-import pandas as pd
  
 
 def spherical_jn_sensible_grid(n, m, ngrid=100000):
@@ -65,14 +63,14 @@ def precompute_sph_bessel_zeros(l_max, N_zeros, saveFileName):
 
 
     # Save the zeros to a .csv file
-    pd.DataFrame(data=sphericalBesselZeros).to_csv(saveFileName)
+    np.savetxt(saveFileName, sphericalBesselZeros, delimiter=",")
 
 
     return sphericalBesselZeros
 
 
 def loadSphericalBesselZeros(fileName):
-    return pd.read_csv(fileName, index_col=0).to_numpy()
+    return np.loadtxt(fileName, delimiter=",")
 
 
 # precompute_sph_bessel_zeros(100, 1000, "zeros.csv")
