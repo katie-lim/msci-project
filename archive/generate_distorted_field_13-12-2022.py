@@ -28,6 +28,77 @@ f_lmn_true = generate_f_lmn(l_max, n_max, r_max_true)
 
 # %%
 
+def f_of_r(r_true, theta, phi, f_lmn_true, l_max, k_max, r_max):
+    total = 0
+
+    for l in range(l_max + 1):
+        n_max_l = calculate_n_max_l(l, k_max, r_max)
+
+        for m in range(-l, l + 1):
+
+            for n in range(n_max_l + 1):
+                if m < 0:
+                    f_lmn_value = np.conj(f_lmn_true[l][-m][n]) * (-1)**m
+                else:
+                    f_lmn_value = f_lmn_true[l][m][n]
+
+                k_ln = sphericalBesselZeros[l][n] / r_max
+
+                total += f_lmn_value * c_ln_values[l][n] * spherical_jn(l, k_ln * r_true) * sph_harm(m, l, theta, phi)
+
+    return total
+
+# %%
+
+f_of_r(0.5, 1, 1, f_lmn_true, l_max, k_max, r_max)
+
+# %%
+
+f_of_r(0.5, 1, 2, f_lmn_true, l_max, k_max, r_max)
+
+# %%
+
+def f_of_z(z, rOfZ, theta, phi, f_lmn_true, l_max, k_max, r_max):
+    total = 0
+
+    for l in range(l_max + 1):
+        n_max_l = calculate_n_max_l(l, k_max, r_max)
+
+        for m in range(-l, l + 1):
+
+            for n in range(n_max_l + 1):
+                if m < 0:
+                    f_lmn_value = np.conj(f_lmn_true[l][-m][n]) * (-1)**m
+                else:
+                    f_lmn_value = f_lmn_true[l][m][n]
+
+                k_ln = sphericalBesselZeros[l][n] / r_max
+
+                total += f_lmn_value * c_ln_values[l][n] * spherical_jn(l, k_ln * rOfZ(z)) * sph_harm(m, l, theta, phi)
+
+    return total
+
+
+# %%
+
+rOfZ = getInterpolatedRofZ(0.3)
+
+f_of_z(0.2, rOfZ, 1, 1, f_lmn_true, l_max, k_max, r_max)
+
+
+# %%
+
+f_of_z(0.2, rOfZ, 0.3, 1, f_lmn_true, l_max, k_max, r_max)
+
+# %%
+
+f_of_z(0.2, rOfZ, 0.9, 4, f_lmn_true, l_max, k_max, r_max)
+
+# %%
+
+thetas = np.linspace(0, np.pi, 50)
+phis = np.linspace(0, 2*np.pi, 100, endpoint=False)
+
 radii_true = np.linspace(0, r_max_true, 1000)
 true_z_of_r = getInterpolatedZofR(omega_m_true)
 z_true = true_z_of_r(radii_true)
@@ -71,7 +142,7 @@ def calcCoeffs(r_i, l_max, k_max, r_max, f_lmn):
 
 
 
-# Calculate the spherical harmonic coefficients for each shell
+# Calculate the spherical harmonic coefficients
 all_coeffs = []
 
 for i in range(len(radii_true)):
@@ -92,7 +163,7 @@ for i in range(len(radii_true)):
     all_grids.append(grid)
 
 
-# ----- OBSERVED
+# -----
 
 
 omega_matter_0 = 0.48
@@ -108,6 +179,11 @@ for i in range(len(radii_fiducial)):
 
     fiducial_coeffs = grid.expand()
     all_fiducial_coeffs.append(fiducial_coeffs)
+
+
+# %%
+
+all_fiducial_coeffs
 
 # %%
 
@@ -141,8 +217,6 @@ for l in range(l_max + 1):
 # %%
 
 
-# Plot some example a_lm(r)'s
-
 # l_test, m_test = 0, 0
 # l_test, m_test = 1, 0
 # l_test, m_test = 1, 1
@@ -161,7 +235,6 @@ plt.plot(radii_fiducial, a_lm_imag_interps[l_test][m_test](radii_fiducial), labe
 plt.xlabel("r_0")
 plt.title("a_%d,%d(r_0)" % (l_test, m_test))
 plt.legend()
-plt.show()
 
 
 # %%
@@ -184,7 +257,7 @@ f_lmn_0 = np.zeros((l_max + 1, l_max + 1, n_max + 1), dtype=complex)
 
 
 for l in range(l_max + 1):
-    n_max_l = calculate_n_max_l(l, k_max, r_max_0) # Will using r_max_0 instead of r_max change the number of modes?
+    n_max_l = calculate_n_max_l(l, k_max, r_max_0) # r_max_0?
 
     print("l = %d" % l)
 
@@ -213,7 +286,7 @@ for l in range(l_max + 1):
 
 # %%
 
-print(f_lmn_0)
+f_lmn_0
 
 # %%
 
@@ -222,25 +295,116 @@ np.save("f_lmn_0_values_true-0.5_fiducial-0.48.npy", f_lmn_0)
 
 # %%
 
-# Plot an example integrand (uncomment this code)
+l, m, n = 1, 1, 6
 
-# l, m, n = 1, 1, 6
+k_ln = sphericalBesselZeros[l][n] / r_max_0
+c_ln = c_ln_values[l][n]
 
-# k_ln = sphericalBesselZeros[l][n] / r_max_0
-# c_ln = c_ln_values[l][n]
+def real_integrand(r0):
+    return spherical_jn(l, k_ln * r0) * r0*r0 * a_lm_real_interps[l][m](r0)
 
-# def real_integrand(r0):
-#     return spherical_jn(l, k_ln * r0) * r0*r0 * a_lm_real_interps[l][m](r0)
-
-# def imag_integrand(r0):
-#     return spherical_jn(l, k_ln * r0) * r0*r0 * a_lm_imag_interps[l][m](r0)
+def imag_integrand(r0):
+    return spherical_jn(l, k_ln * r0) * r0*r0 * a_lm_imag_interps[l][m](r0)
 
 
-# plt.plot(radii_fiducial, real_integrand(radii_fiducial))
-# plt.show()
 
-# print("Quad:", quad(real_integrand, 0, r_max_0))
-# print("Integral split into 10 pieces:", computeIntegralSplit(real_integrand, 10, r_max_0))
+plt.plot(radii_fiducial, real_integrand(radii_fiducial))
+plt.show()
+
+print("Quad:", quad(real_integrand, 0, r_max_0))
+print("Split integral:", computeIntegralSplit(real_integrand, 10, r_max_0))
+
+
+# %%
+
+
+# def generateFieldAtRadius(r_i, l_max, k_max, r_max, lmax_calc=None):
+#     if lmax_calc == None:
+#         # Default to l_max
+#         lmax_calc = l_max
+
+
+#     # Get the coefficients a_lm
+#     # in the format required by pyshtools
+#     cilm = calcCoeffs(r_i, l_max, k_max, r_max)
+#     coeffs = pysh.SHCoeffs.from_array(cilm)
+
+
+#     # Do the transform
+#     grid = coeffs.expand(lmax_calc=lmax_calc)
+
+#     return grid
+
+
+# %%
+
+
+
+
+# Evaluate true field on a grid
+
+field_grid = np.zeros((radii_true.size, thetas.size, phis.size))
+
+for i in range(len(radii_true)):
+    r_true = radii_true[i]
+    for j in range(len(thetas)):
+        theta = thetas[j]
+        for k in range(len(phis)):
+            phi = phis[k]
+
+            field_grid[i][j][k] = f_of_r(r_true, theta, phi, f_lmn_true, l_max, k_max, r_max_true)
+
+
+
+# %%
+
+
+field_grid
+
+# %%
+
+f_of_r(0.5, 1, 1, f_lmn_true, l_max, k_max, r_max_true)
+
+# %%
+
+# %%
+
+angular_integrals = []
+
+for i in range(len(radii_fiducial)):
+    field_grid_at_radius = field_grid[i]
+
+    shgrid = pysh.SHGrid.from_array(field_grid_at_radius)
+    
+    fig = shgrid.plotgmt(projection='mollweide', colorbar='right')
+    fig.show()
+
+    angular_integrals.append(shgrid.expand(lmax_calc=l_max))
+
+# %%
+
+angular_integrals
+
+# %%
+
+angular_integrals[1]
+
+# %%
+
+angular_integrals[1].plot_spectrum2d()
+
+
+# %%
+
+angular_integrals[1].coeffs[0]
+
+# %%
+
+angular_integrals[1].coeffs[1]
+
+# %%
+
+# %%
 
 
 # %%
