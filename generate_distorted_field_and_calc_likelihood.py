@@ -12,19 +12,31 @@ from compute_likelihood import calculate_n_max_l, calc_all_Ws_without_delta_omeg
 from distance_redshift_relation import *
 
 
-
-l_max = 7
-k_max = 10
-r_max = 2.5
-n_max = calculate_n_max_l(0, k_max, r_max) # There are the most modes when l=0
+l_max = 15
+k_max = 100
+r_max_true = 0.8
+n_max = calculate_n_max_l(0, k_max, r_max_true) # There are the most modes when l=0
 
 
 c_ln_values = load_c_ln_values("c_ln.csv")
 sphericalBesselZeros = loadSphericalBesselZeros("zeros.csv")
-f_lmn = generate_f_lmn(l_max, n_max, r_max)
+
+# %%
+
+omega_matter_true = 0.5
+f_lmn_true = generate_f_lmn(l_max, n_max, r_max_true)
+
+# %%
+
+radii_true = np.linspace(0, r_max_true, 1000)
+true_z_of_r = getInterpolatedZofR(omega_matter_true)
+z_true = true_z_of_r(radii_true)
 
 
-def a_lm(r_i, l, m, k_max, r_max):
+# %%
+
+
+def a_lm(r_i, l, m, k_max, r_max, f_lmn):
     s = 0
 
     n = 0
@@ -37,12 +49,11 @@ def a_lm(r_i, l, m, k_max, r_max):
         n += 1
         k_ln = sphericalBesselZeros[l][n] / r_max
 
-    # print("l = %d, max n = %d" % (l, n - 1))
 
     return s
 
 
-def calcCoeffs(r_i, l_max, k_max, r_max):
+def calcCoeffs(r_i, l_max, k_max, r_max, f_lmn):
     cilm = np.zeros((2, l_max + 1, l_max + 1))
 
     for l in range(l_max + 1):
@@ -50,7 +61,7 @@ def calcCoeffs(r_i, l_max, k_max, r_max):
         # We don't need to supply the -ve m
         # Since we are working with real fields
         for m in range(l + 1):
-            coeff = a_lm(r_i, l, m, k_max, r_max)
+            coeff = a_lm(r_i, l, m, k_max, r_max, f_lmn)
 
             cilm[0][l][m] = np.real(coeff)
             cilm[1][l][m] = np.imag(coeff)
@@ -59,243 +70,231 @@ def calcCoeffs(r_i, l_max, k_max, r_max):
     return cilm
 
 
-def generateFieldAtRadius(r_i, lmax_calc=None):
-    if lmax_calc == None:
-        # Default to l_max
-        lmax_calc = l_max
 
+# Calculate the spherical harmonic coefficients for each shell
+all_coeffs = []
 
-    # Get the coefficients a_lm
-    # in the format required by pyshtools
-    cilm = calcCoeffs(r_i, l_max, k_max, r_max)
+for i in range(len(radii_true)):
+    r_true = radii_true[i]
+
+    cilm = calcCoeffs(r_true, l_max, k_max, r_max_true, f_lmn_true)
     coeffs = pysh.SHCoeffs.from_array(cilm)
 
-
-    # Do the transform
-    grid = coeffs.expand(lmax_calc=lmax_calc)
-
-    return grid
+    all_coeffs.append(coeffs)
 
 
+# Expand the coefficients & evaluate the field on a grid
+all_grids = []
 
-def plotField(grid, r_i, lmax_calc):
+for i in range(len(radii_true)):
+    grid = all_coeffs[i].expand()
 
-    title = "r_i = %.2f, r_max = %.2f, k_max = %.2f, l_max = %d, lmax_calc = %d" % (r_i, r_max, k_max, l_max, lmax_calc)
-
-    # Plot the field using the Mollweide projection
-
-    fig = grid.plotgmt(projection='mollweide', colorbar='right', title=title)
-    fig.show()
+    all_grids.append(grid)
 
 
-# %%
-
-# Generate field at many radii, add distortion
-
-# Set a "true" cosmology
-omega_matter_true = 0.5
-
-# Generate a set of radii (shells)
-# r_vals_true = np.linspace(0.01, 2.5, 50)
-r_vals_true = np.linspace(0.001, 2.5, 50)
-# r_vals_true = np.linspace(0.001, 2.5, 50)
-
-# Get the true redshift-distance relation
-z_interp = getInterpolatedZofR(omega_matter_true)
-
-# # Convert the true radii to true redshifts
-# z_vals = z_interp(r_vals_true)
-z_vals = np.linspace(0.00001, 1000, 5000)
+# ----- OBSERVED
 
 
-# Generate an (angular) field at each true radius
-field = []
-lmax_calc = l_max
+omega_matter_0 = 0.48
 
-for r_val in r_vals_true:
-    field_at_radius = generateFieldAtRadius(r_val)
-    field.append(field_at_radius)
+r_of_z_fiducial = getInterpolatedRofZ(omega_matter_0)
+radii_fiducial = r_of_z_fiducial(z_true)
+r_max_0 = radii_fiducial[-1]
 
+
+all_fiducial_coeffs = []
+
+for i in range(len(radii_fiducial)):
+    grid = all_grids[i]
+
+    fiducial_coeffs = grid.expand()
+    all_fiducial_coeffs.append(fiducial_coeffs)
 
 # %%
 
-# Calculate the a_lm for the field
-
-coeffs = []
-
-for i in range(len(r_vals_true)):
-    r_val = r_vals_true[i]
-    field_at_radius = field[i]
-
-    coeffs_at_radius = field_at_radius.expand()
-    coeffs.append(coeffs_at_radius)
-
-
-
-a_lm_interp = [[] for _ in range(l_max + 1)]
+a_lm_real_interps = []
+a_lm_imag_interps = []
 
 for l in range(l_max + 1):
+    a_l_real_interps = []
+    a_l_imag_interps = []
+
     for m in range(l + 1):
-        a_lm_values = []
+        real_parts = []
+        imag_parts = []
 
-        for i in range(len(r_vals_true)):
-            coeffs_at_radius = coeffs[i].coeffs
+        for i in range(len(radii_fiducial)):
+            coeffs = all_fiducial_coeffs[i].coeffs
 
-            a_lm_real = coeffs_at_radius[0][l][m]
-            a_lm_imag = coeffs_at_radius[1][l][m]
+            real_parts.append(coeffs[0][l][m])
+            imag_parts.append(coeffs[1][l][m])
 
-            a_lm_values.append(a_lm_real + (a_lm_imag * 1j))
+        a_lm_interp_real = interp1d(radii_fiducial, real_parts)
+        a_lm_interp_imag = interp1d(radii_fiducial, imag_parts)
 
-        a_lm_interpolated = interp1d(r_vals_true, a_lm_values)
-        # a_lm[l][m] = a_lm_interp
-        a_lm_interp[l].append(a_lm_interpolated)
+        a_l_real_interps.append(a_lm_interp_real)
+        a_l_imag_interps.append(a_lm_interp_imag)
+
+    a_lm_real_interps.append(a_l_real_interps)
+    a_lm_imag_interps.append(a_l_imag_interps)
 
 
-# Try plotting an interpolated a_lm
-# l_to_plot, m_to_plot = 1, 1
+# %%
 
-# plt.plot(r_vals, np.real(a_lm_interp[l_to_plot][m_to_plot](r_vals)))
-# plt.plot(r_vals, np.imag(a_lm_interp[l_to_plot][m_to_plot](r_vals)))
+
+# Plot some example a_lm(r)'s
+
+# l_test, m_test = 0, 0
+# l_test, m_test = 1, 0
+# l_test, m_test = 1, 1
+# l_test, m_test = 2, 0
+# l_test, m_test = 2, 1
+# l_test, m_test = 2, 2
+# l_test, m_test = 3, 0
+# l_test, m_test = 3, 1
+# l_test, m_test = 3, 2
+# l_test, m_test = 3, 3
+
+# l_test, m_test = 14, 10
+
+# plt.plot(radii_fiducial, a_lm_real_interps[l_test][m_test](radii_fiducial), label="real")
+# plt.plot(radii_fiducial, a_lm_imag_interps[l_test][m_test](radii_fiducial), label="imag")
+# plt.xlabel("r_0")
+# plt.title("a_%d,%d(r_0)" % (l_test, m_test))
+# plt.legend()
 # plt.show()
 
 
-
-# %%
-
-# Assume a fiducial cosmology with a different omega_matter
-omega_matter_0 = 0.5
-
-# Get the distance-redshift relation in the fiducial cosmology
-r_0_interp = getInterpolatedRofZ(omega_matter_0)
-
-# Convert the true redshifts into measured radii
-r_0_vals = r_0_interp(z_vals)
-
 # %%
 
 
-# Now we'll vary omega_matter.
-# omega_matter = 0.51
-# print("Calculating f_lmn^0 for Ωₘ = %.3f." % omega_matter)
+def computeIntegralSplit(integrand, N, upperLimit):
+    answer = 0
+    step = upperLimit / N
 
-# # Get the distance-redshift relation in the assumed true cosmology
-# r_interp = getInterpolatedRofZ(omega_matter)
-# # Convert the measured redshifts into assumed true radii
-# r_vals = r_interp(z_vals)
+    for i in range(N):
+        answer += quad(integrand, i*step, (i+1)*step)[0]
 
-# r_0_of_r_interp = interp1d(r_vals, r_0_vals)
-
-
-# print("r_max =", r_max)
-# print("maximum of interp:", r_vals[-1])
-# print("minimum of interp:", r_vals[0])
-# print("min:", r_0_of_r_interp(0.01))
-# r_max_0 = r_0_of_r_interp(r_max)
-
+    return answer
 
 
 # %%
 
-def calc_f_lmn_0(omega_matter):
-
-    # Now we'll vary omega_matter.
-    print("Calculating f_lmn^0 for Ωₘ = %.3f." % omega_matter)
-
-    # Get the distance-redshift relation in the assumed true cosmology
-    r_interp = getInterpolatedRofZ(omega_matter)
-    # Convert the measured redshifts into assumed true radii
-    r_vals = r_interp(z_vals)
-
-    r_0_of_r_interp = interp1d(r_vals, r_0_vals)
+f_lmn_0 = np.zeros((l_max + 1, l_max + 1, n_max + 1), dtype=complex)
 
 
-    # Plot the measured radii as a function of true radii
-    # (r_0 as a function of r)
+for l in range(l_max + 1):
+    n_max_l = calculate_n_max_l(l, k_max, r_max_0) # Will using r_max_0 instead of r_max change the number of modes?
 
-    # plt.plot(r_vals, r_0_vals)
-    # plt.xlabel("r")
-    # plt.ylabel("$r_0$")
-    # plt.title("True: $\Omega_m$=%.2f, Fiducial: $\Omega_m^0$=%.2f" % (omega_matter, omega_matter_0))
-    # plt.show()
+    print("l = %d" % l)
 
+    for m in range(l + 1):
+        for n in range(n_max_l + 1):
+            k_ln = sphericalBesselZeros[l][n] / r_max_0
+            c_ln = c_ln_values[l][n]
 
-    # Get the Jacobian
-    jacobian = calculateJacobian(r_vals, r_0_vals)
+            def real_integrand(r0):
+                return spherical_jn(l, k_ln * r0) * r0*r0 * a_lm_real_interps[l][m](r0)
 
-
-    # Get f_lmn^0 coefficients in the fiducial cosmology
-    f_lmn_0 = np.zeros((l_max + 1, l_max + 1, n_max + 1), dtype=complex)
-
-    print("r_max =", r_max)
-    print("maximum of interp:", r_vals[-1])
-    print("minimum of interp:", r_vals[0])
-    print("min:", r_0_of_r_interp(0.01))
-    r_max_0 = r_0_of_r_interp(r_max)
+            def imag_integrand(r0):
+                return spherical_jn(l, k_ln * r0) * r0*r0 * a_lm_imag_interps[l][m](r0)
 
 
-    for l in range(l_max + 1):
-        print("l = %d" % l)
-        for m in range(l + 1):
+            # real_integral, error = quad(real_integrand, 0, r_max_0)
+            # imag_integral, error = quad(imag_integrand, 0, r_max_0)
 
-            n_max_l = calculate_n_max_l(l, k_max, r_max)
+            real_integral = computeIntegralSplit(real_integrand, 10, r_max_0)
+            imag_integral = computeIntegralSplit(imag_integrand, 10, r_max_0)
 
-            for n in range(n_max_l + 1):
+            total_integral = real_integral + (1j * imag_integral)
 
-                k_ln = sphericalBesselZeros[l][n] / r_max_0
-                c_ln = c_ln_values[l][n] * r_max_0**(-3/2)
-
-                def integrand(r_val):
-                    print("a_lm:")
-                    print(a_lm_interp[l][m](r_val))
-                    return a_lm_interp[l][m](r_val)
-                    # return a_lm_interp[l][m](r_val) * spherical_jn(l, k_ln*r_val) * jacobian(r_val) * r_val**2
-
-
-                # change lower limit to 0 later?
-                lower_bound = r_0_of_r_interp(0.01)
-                integral, error = quad(integrand, lower_bound, r_max_0)
-
-                f_lmn_0[l][m][n] = c_ln * integral
-
-    return f_lmn_0
+            f_lmn_0[l][m][n] = c_ln * total_integral
 
 
 # %%
 
-# Compute the likelihood function
-
-# omega_matters = np.linspace(0.48, 0.52, 30)
-omega_matters = np.linspace(0.51, 0.52, 5)
-
-print(omega_matters)
+print(f_lmn_0)
 
 # %%
 
-# Perform the inverse transform
-f_lmn_0_vals = []
+saveFileName = "f_lmn_0_true-%.3f_fiducial-%.3f_l_max-%d_k_max-%.2f_r_max_true-%.3f" % (omega_matter_true, omega_matter_0, l_max, k_max, r_max_true)
 
-for omega_m in omega_matters:
-    f_lmn_0_vals.append(calc_f_lmn_0(omega_m))
+np.save(saveFileName, f_lmn_0)
 
+# %%
+
+# Or, load f_lmn_0 from a file
+# f_lmn_0_loaded = np.load("f_lmn_0_true-0.5_fiducial-0.48_l_max-15_k_max-100_r_max_true-0.8.npy")
+
+
+# %%
+
+# Plot an example integrand (uncomment this code)
+
+# l, m, n = 1, 1, 6
+
+# k_ln = sphericalBesselZeros[l][n] / r_max_0
+# c_ln = c_ln_values[l][n]
+
+# def real_integrand(r0):
+#     return spherical_jn(l, k_ln * r0) * r0*r0 * a_lm_real_interps[l][m](r0)
+
+# def imag_integrand(r0):
+#     return spherical_jn(l, k_ln * r0) * r0*r0 * a_lm_imag_interps[l][m](r0)
+
+
+# plt.plot(radii_fiducial, real_integrand(radii_fiducial))
+# plt.show()
+
+# print("Quad:", quad(real_integrand, 0, r_max_0))
+# print("Integral split into 10 pieces:", computeIntegralSplit(real_integrand, 10, r_max_0))
+
+
+# %%
+
+
+# Calculate likelihood
+
+omega_matters = np.linspace(omega_matter_0 - 0.03, omega_matter_0 + 0.03, 96)
 
 # %%
 
 dr_domega = getPartialRbyOmegaMatterInterp(omega_matter_0)
-Ws_without_delta_omega_m = calc_all_Ws_without_delta_omega_m(l_max, k_max, r_max, dr_domega)
-
-# %%
-
-# likelihoods = [computeLikelihood(f_lmn_0_vals[i], k_max, r_max, omega_matters[i], omega_matter_0, Ws_without_delta_omega_m) for i in range(len(omega_matters))]
-likelihoods = [computeLikelihood(f_lmn_0_vals[i], k_max, r_max, omega_matters[i], omega_matter_0, Ws_without_delta_omega_m) for i in range(len(f_lmn_0_vals))]
+Ws_without_delta_omega_m = calc_all_Ws_without_delta_omega_m(l_max, k_max, r_max_0, dr_domega)
 
 
 # %%
 
-omega_matters = np.linspace(0.48, 0.52, 30)
-plt.plot(omega_matters[:len(likelihoods)], likelihoods)
+likelihoods = [computeLikelihood(f_lmn_0, k_max, r_max_0, omega_m, omega_matter_0, Ws_without_delta_omega_m) for omega_m in omega_matters]
+
+# %%
+
+# Calculate the redshift limit equivalent to the radial limit
+# (assuming the fiducial cosmology)
+z_max = getInterpolatedZofR(omega_matter_0)(r_max_0)
+
+
+# Plot the likelihood function
+
+plt.plot(omega_matters, likelihoods)
+# plt.plot(omega_matters, likelihoods, '.')
 plt.xlabel("$\Omega_m$")
 plt.ylabel("ln L")
+plt.title("ln L($\Omega_m$)\n$\Omega_m^{true}$=%.2f\n$\Omega_m^{fiducial}}$=%.2f\n$l_{max}$=%d, $k_{max}$=%.1f, $r_{max}^0$=%.2f ($z_{max}$=%.2f), $n_{max,0}$=%d" % (omega_matter_true, omega_matter_0, l_max, k_max, r_max_0, z_max, n_max))
 plt.show()
+# %%
 
+
+# Find the maximum
+peak_index = np.argmax(likelihoods)
+print("Peak is at Ωₘ = %.4f" % omega_matters[peak_index])
+
+# Find the index of the true Ωₘ
+true_index = np.argmin(np.abs(omega_matters - omega_matter_true))
+
+print("ln L(true Ωₘ) = %.3f" % np.real(likelihoods[true_index]))
+print("ln L(peak Ωₘ) = %.3f" % np.real(likelihoods[peak_index]))
+print("ln L(true Ωₘ) - ln L(peak Ωₘ) = %.3f" % np.real(likelihoods[true_index] - likelihoods[peak_index]))
+print("L(true Ωₘ) / L(peak Ωₘ) = %.3e" % np.exp(np.real(likelihoods[true_index] - likelihoods[peak_index])))
 
 # %%
