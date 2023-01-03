@@ -1,6 +1,7 @@
 # %%
 
 import numpy as np
+import matplotlib.pyplot as plt
 from scipy.integrate import quad
 from scipy.special import jv, spherical_jn
 
@@ -59,13 +60,22 @@ def computeIntegralSplit(integrand, N, upperLimit):
 #     return c_ln_values[l][n] * c_ln_values[l][n_prime] * k_ln * d_omega_matter * integral
 
 
-def calc_W_without_delta_omega_m(n, n_prime, l, r_max, dr_domega):
+def calc_W_without_delta_omega_m(n, n_prime, l, r_max, dr_domega, plotIntegrand=False):
     k_ln = sphericalBesselZeros[l][n] / r_max
     k_ln_prime = sphericalBesselZeros[l][n_prime] / r_max
 
 
     def W_integrand(r):
         return r*r * spherical_jn(l, k_ln_prime*r) * spherical_jn(l, k_ln*r, True) * dr_domega(r)
+
+    
+    if plotIntegrand:
+        r_vals = np.linspace(0, r_max, 500)
+        plt.figure(dpi=200)
+        plt.plot(r_vals, W_integrand(r_vals))
+        plt.xlabel("r")
+        plt.ylabel("integrand for W^%d_%d,%d" % (l, n, n_prime))
+        plt.show()
 
 
     # integral, error = quad(integrand, 0, r_max)
