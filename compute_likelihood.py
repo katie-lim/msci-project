@@ -33,12 +33,15 @@ def calculate_n_max_l(l, k_max, r_max):
     return n - 1
 
 
-def computeIntegralSplit(integrand, N, upperLimit):
+# The default error tolerance used by scipy.quad is epsabs=1.49e-8
+def computeIntegralSplit(integrand, N, upperLimit, epsabs=1.49e-8):
     answer = 0
     step = upperLimit / N
 
     for i in range(N):
-        answer += quad(integrand, i*step, (i+1)*step)[0]
+        integral, error = quad(integrand, i*step, (i+1)*step, epsabs=epsabs)
+        answer += integral
+        # print(error)
 
     return answer
 
@@ -60,7 +63,7 @@ def computeIntegralSplit(integrand, N, upperLimit):
 #     return c_ln_values[l][n] * c_ln_values[l][n_prime] * k_ln * d_omega_matter * integral
 
 
-def calc_W_without_delta_omega_m(n, n_prime, l, r_max, dr_domega, plotIntegrand=False):
+def calc_W_without_delta_omega_m(n, n_prime, l, r_max, dr_domega, Nsplit=10, epsabs=1.49e-8, plotIntegrand=False):
     k_ln = sphericalBesselZeros[l][n] / r_max
     k_ln_prime = sphericalBesselZeros[l][n_prime] / r_max
 
@@ -79,7 +82,7 @@ def calc_W_without_delta_omega_m(n, n_prime, l, r_max, dr_domega, plotIntegrand=
 
 
     # integral, error = quad(integrand, 0, r_max)
-    integral = computeIntegralSplit(W_integrand, 10, r_max)
+    integral = computeIntegralSplit(W_integrand, Nsplit, r_max, epsabs)
 
     return c_ln_values[l][n] * c_ln_values[l][n_prime] * k_ln * integral
 
