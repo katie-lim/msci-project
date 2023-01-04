@@ -35,7 +35,7 @@ def precompute_c_ln_values(l_max, n_max, saveFileName):
     return c_ln_values
 
 
-def load_c_ln_values(fileName):
+def get_c_ln_values_without_r_max(fileName):
     return np.loadtxt(fileName, delimiter=",")
 
 

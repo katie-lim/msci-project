@@ -6,7 +6,7 @@ from scipy.special import spherical_jn, sph_harm
 
 from utils import calc_n_max_l
 from generate_f_lmn import generate_f_lmn
-from precompute_c_ln import load_c_ln_values
+from precompute_c_ln import get_c_ln_values_without_r_max
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
 
 from distance_redshift_relation import *
@@ -18,7 +18,7 @@ r_max_true = 0.8
 n_max = calc_n_max_l(0, k_max, r_max_true) # There are the most modes when l=0
 
 
-c_ln_values = load_c_ln_values("c_ln.csv")
+c_ln_values = get_c_ln_values_without_r_max("c_ln.csv")
 sphericalBesselZeros = loadSphericalBesselZeros("zeros.csv")
 
 # %%

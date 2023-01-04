@@ -1,10 +1,10 @@
 # %%
 from scipy.special import spherical_jn
-from precompute_c_ln import load_c_ln_values
+from precompute_c_ln import get_c_ln_values_without_r_max
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
 from scipy.integrate import quad
 
-c_ln_values = load_c_ln_values("c_ln.csv")
+c_ln_values = get_c_ln_values_without_r_max("c_ln.csv")
 sphericalBesselZeros = loadSphericalBesselZeros("zeros.csv")
 
 

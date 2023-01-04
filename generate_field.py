@@ -5,7 +5,7 @@ import numpy as np
 from scipy.special import spherical_jn
 
 from generate_f_lmn import generate_f_lmn
-from precompute_c_ln import load_c_ln_values
+from precompute_c_ln import get_c_ln_values_without_r_max
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
 
 
@@ -19,7 +19,7 @@ n_max = 1000
 # r_max = 5
 # n_max = 1000
 
-c_ln_values = load_c_ln_values("c_ln.csv")
+c_ln_values = get_c_ln_values_without_r_max("c_ln.csv")
 sphericalBesselZeros = loadSphericalBesselZeros("zeros.csv")
 f_lmn = generate_f_lmn(l_max, n_max, r_max)
 
