@@ -1,6 +1,6 @@
 # %%
 
-from utils import calculate_n_max_l
+from utils import calc_n_max_l
 from compute_likelihood import calc_W_without_delta_omega_m
 #, calc_all_Ws_without_delta_omega_m
 
@@ -10,7 +10,7 @@ from distance_redshift_relation import *
 l_max = 15
 k_max = 100
 r_max_true = 0.8
-n_max = calculate_n_max_l(0, k_max, r_max_true) # There are the most modes when l=0
+n_max = calc_n_max_l(0, k_max, r_max_true) # There are the most modes when l=0
 
 omega_matter_0 = 0.48
 
@@ -18,7 +18,7 @@ dr_domega = getPartialRbyOmegaMatterInterp(omega_matter_0)
 # Ws_without_delta_omega_m = calc_all_Ws_without_delta_omega_m(l_max, k_max, r_max_0, dr_domega)
 
 for l in range(l_max + 1):
-    print("n_max_%d is %d" % (l, calculate_n_max_l(l, k_max, r_max_true)))
+    print("n_max_%d is %d" % (l, calc_n_max_l(l, k_max, r_max_true)))
 
 # %%
 

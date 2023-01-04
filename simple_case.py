@@ -1,7 +1,7 @@
 # %%
 import numpy as np
 
-from utils import calculate_n_max_l
+from utils import calc_n_max_l
 from generate_f_lmn import generate_f_lmn
 from precompute_c_ln import load_c_ln_values
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
@@ -14,7 +14,7 @@ l_max = 20
 # k_max = 10
 k_max = 300
 r_max = 0.8
-n_max = calculate_n_max_l(0, k_max, r_max) # There are the most modes when l=0
+n_max = calc_n_max_l(0, k_max, r_max) # There are the most modes when l=0
 
 
 c_ln_values = load_c_ln_values("c_ln.csv")

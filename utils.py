@@ -4,7 +4,7 @@ from precompute_sph_bessel_zeros import loadSphericalBesselZeros
 sphericalBesselZeros = loadSphericalBesselZeros("zeros.csv")
 
 
-def calculate_n_max_l(l, k_max, r_max):
+def calc_n_max_l(l, k_max, r_max):
     n = 0
     k_ln = sphericalBesselZeros[l][0] / r_max
 

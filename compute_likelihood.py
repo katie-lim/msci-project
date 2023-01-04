@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from scipy.integrate import quad
 from scipy.special import jv, spherical_jn
 
-from utils import calculate_n_max_l
+from utils import calc_n_max_l
 from precompute_c_ln import load_c_ln_values
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
 from distance_redshift_relation import getInterpolatedZofR, getPartialRbyOmegaMatterInterp
@@ -77,12 +77,12 @@ def calc_W_without_delta_omega_m(n, n_prime, l, r_max, dr_domega, Nsplit=10, eps
 
 def calc_all_Ws_without_delta_omega_m(l_max, k_max, r_max, dr_domega):
     # The maximum number of modes is when l=0
-    n_max_0 = calculate_n_max_l(0, k_max, r_max)
+    n_max_0 = calc_n_max_l(0, k_max, r_max)
 
     W_lnn_prime = np.zeros((l_max + 1, n_max_0 + 1, n_max_0 + 1))
 
     for l in range(l_max + 1):
-        n_max_l = calculate_n_max_l(l, k_max, r_max)
+        n_max_l = calc_n_max_l(l, k_max, r_max)
 
         for n1 in range(n_max_l + 1):
             for n2 in range(n_max_l + 1):
@@ -111,7 +111,7 @@ def computeExpectation(l, m, n, l_prime, m_prime, n_prime, k_max, r_max, omega_m
         W_n_nprime = Ws_without_delta_omega_m[l][n][n_prime] * delta_omega_matter
 
 
-        n_max_l = calculate_n_max_l(l, k_max, r_max)
+        n_max_l = calc_n_max_l(l, k_max, r_max)
         n_prime_prime_sum = 0
 
         for n_prime_prime in range(n_max_l + 1):
@@ -139,7 +139,7 @@ def computeLikelihood(f_lmn, k_max, r_max, omega_matter, omega_matter_0, Ws_with
 
     for l in range(l_max + 1):
         # print("l =", l)
-        n_max_l = calculate_n_max_l(l, k_max, r_max)
+        n_max_l = calc_n_max_l(l, k_max, r_max)
         
         # Stop if there are no more modes
         if (n_max_l == -1): break
@@ -281,7 +281,7 @@ def computeLikelihood(f_lmn, k_max, r_max, omega_matter, omega_matter_0, Ws_with
 
 # l = 1
 # print("l =", l)
-# n_max_l = calculate_n_max_l(l, k_max, r_max)
+# n_max_l = calc_n_max_l(l, k_max, r_max)
 
 # # %%
 

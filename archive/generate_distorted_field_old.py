@@ -4,7 +4,7 @@ import pyshtools as pysh
 import numpy as np
 from scipy.special import spherical_jn
 
-from utils import calculate_n_max_l
+from utils import calc_n_max_l
 from generate_f_lmn import generate_f_lmn
 from precompute_c_ln import load_c_ln_values
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
@@ -25,7 +25,7 @@ from distance_redshift_relation import *
 l_max = 15
 k_max = 10
 r_max = 2.5
-n_max = calculate_n_max_l(0, k_max, r_max) # There are the most modes when l=0
+n_max = calc_n_max_l(0, k_max, r_max) # There are the most modes when l=0
 
 
 c_ln_values = load_c_ln_values("c_ln.csv")
@@ -235,7 +235,7 @@ r_max_0 = r_0_of_r_interp(r_max)
 for l in range(l_max + 1):
     print("l = %d" % l)
     for m in range(l + 1):
-        n_max_l = calculate_n_max_l(l, k_max, r_max)
+        n_max_l = calc_n_max_l(l, k_max, r_max)
 
         for n in range(n_max_l + 1):
 

@@ -4,7 +4,7 @@ import pyshtools as pysh
 import numpy as np
 from scipy.special import spherical_jn, sph_harm
 
-from utils import calculate_n_max_l
+from utils import calc_n_max_l
 from generate_f_lmn import generate_f_lmn
 from precompute_c_ln import load_c_ln_values
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
@@ -15,7 +15,7 @@ from distance_redshift_relation import *
 l_max = 15
 k_max = 100
 r_max_true = 0.8
-n_max = calculate_n_max_l(0, k_max, r_max_true) # There are the most modes when l=0
+n_max = calc_n_max_l(0, k_max, r_max_true) # There are the most modes when l=0
 
 
 c_ln_values = load_c_ln_values("c_ln.csv")
@@ -32,7 +32,7 @@ def f_of_r(r_true, theta, phi, f_lmn_true, l_max, k_max, r_max):
     total = 0
 
     for l in range(l_max + 1):
-        n_max_l = calculate_n_max_l(l, k_max, r_max)
+        n_max_l = calc_n_max_l(l, k_max, r_max)
 
         for m in range(-l, l + 1):
 
@@ -62,7 +62,7 @@ def f_of_z(z, rOfZ, theta, phi, f_lmn_true, l_max, k_max, r_max):
     total = 0
 
     for l in range(l_max + 1):
-        n_max_l = calculate_n_max_l(l, k_max, r_max)
+        n_max_l = calc_n_max_l(l, k_max, r_max)
 
         for m in range(-l, l + 1):
 
@@ -257,7 +257,7 @@ f_lmn_0 = np.zeros((l_max + 1, l_max + 1, n_max + 1), dtype=complex)
 
 
 for l in range(l_max + 1):
-    n_max_l = calculate_n_max_l(l, k_max, r_max_0) # r_max_0?
+    n_max_l = calc_n_max_l(l, k_max, r_max_0) # r_max_0?
 
     print("l = %d" % l)
 
