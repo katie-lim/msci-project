@@ -1,6 +1,7 @@
 # %%
 
-from compute_likelihood import calculate_n_max_l, calc_W_without_delta_omega_m
+from utils import calculate_n_max_l
+from compute_likelihood import calc_W_without_delta_omega_m
 #, calc_all_Ws_without_delta_omega_m
 
 from distance_redshift_relation import *

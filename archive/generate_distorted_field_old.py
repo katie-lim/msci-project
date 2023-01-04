@@ -4,10 +4,10 @@ import pyshtools as pysh
 import numpy as np
 from scipy.special import spherical_jn
 
+from utils import calculate_n_max_l
 from generate_f_lmn import generate_f_lmn
 from precompute_c_ln import load_c_ln_values
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
-from compute_likelihood import calculate_n_max_l
 
 from distance_redshift_relation import *
 
