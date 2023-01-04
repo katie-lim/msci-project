@@ -24,7 +24,7 @@ sphericalBesselZeros = loadSphericalBesselZeros("zeros.csv")
 # %%
 
 omega_m_true = 0.5
-f_lmn_true = generate_f_lmn(l_max, n_max, r_max_true)
+f_lmn_true = generate_f_lmn(l_max, r_max_true, k_max)
 
 # %%
 

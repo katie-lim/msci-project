@@ -12,7 +12,7 @@ from precompute_sph_bessel_zeros import loadSphericalBesselZeros
 l_max = 100
 k_max = 50
 r_max = 5
-n_max = 1000
+# n_max = 1000
 
 # l_max = 3
 # k_max = 10
@@ -21,7 +21,7 @@ n_max = 1000
 
 c_ln_values = get_c_ln_values_with_r_max("c_ln.csv", r_max)
 sphericalBesselZeros = loadSphericalBesselZeros("zeros.csv")
-f_lmn = generate_f_lmn(l_max, n_max, r_max)
+f_lmn = generate_f_lmn(l_max, r_max, k_max)
 
 
 def a_lm(r_i, l, m, k_max, r_max):

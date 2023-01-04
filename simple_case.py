@@ -17,7 +17,7 @@ n_max = calc_n_max_l(0, k_max, r_max) # There are the most modes when l=0
 
 
 sphericalBesselZeros = loadSphericalBesselZeros("zeros.csv")
-f_lmn = generate_f_lmn(l_max, n_max, r_max)
+f_lmn = generate_f_lmn(l_max, r_max, k_max)
 
 
 # %%

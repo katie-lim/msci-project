@@ -1,5 +1,6 @@
 # %%
 import numpy as np
+from utils import calc_n_max_l
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
 
 
@@ -13,12 +14,15 @@ def p(k, k_max=300):
         return 0
 
 
-def generate_f_lmn(l_max, n_max, r_max):
+def generate_f_lmn(l_max, r_max, k_max):
+    n_max = calc_n_max_l(0, k_max, r_max)
     f_lmn_values = np.zeros((l_max + 1, l_max + 1, n_max + 1), dtype=complex)
 
     for l in range(l_max + 1):
+        n_max_l = calc_n_max_l(l, k_max, r_max)
+
         for m in range(l + 1):
-            for n in range(n_max + 1):
+            for n in range(n_max_l + 1):
                 k_ln = sphericalBesselZeros[l][n] / r_max
 
                 if m == 0:
