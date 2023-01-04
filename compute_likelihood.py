@@ -3,12 +3,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import quad
-from scipy.special import jv, spherical_jn
+from scipy.special import spherical_jn
 
 from utils import calc_n_max_l
 from precompute_c_ln import get_c_ln_values_without_r_max
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
-from distance_redshift_relation import getInterpolatedZofR, getPartialRbyOmegaMatterInterp
 from generate_f_lmn import p
 
 
