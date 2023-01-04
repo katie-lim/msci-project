@@ -5,6 +5,7 @@ from precompute_sph_bessel_zeros import loadSphericalBesselZeros
 
 zeros = loadSphericalBesselZeros("zeros.csv")
 
+# This is all for r_max = 1.
 
 def get_c_ln(l, n):
     
@@ -37,6 +38,10 @@ def precompute_c_ln_values(l_max, n_max, saveFileName):
 
 def get_c_ln_values_without_r_max(fileName):
     return np.loadtxt(fileName, delimiter=",")
+
+
+def get_c_ln_values_with_r_max(fileName, r_max):
+    return np.power(r_max, -3/2) * np.loadtxt(fileName, delimiter=",")
 
 
 # %%

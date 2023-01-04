@@ -28,7 +28,7 @@ r_max = 2.5
 n_max = calc_n_max_l(0, k_max, r_max) # There are the most modes when l=0
 
 
-c_ln_values = get_c_ln_values_without_r_max("c_ln.csv")
+c_ln_values_without_r_max = get_c_ln_values_without_r_max("c_ln.csv")
 sphericalBesselZeros = loadSphericalBesselZeros("zeros.csv")
 f_lmn = generate_f_lmn(l_max, n_max, r_max)
 
@@ -41,7 +41,7 @@ def a_lm(r_i, l, m, k_max, r_max):
 
     while k_ln < k_max:
 
-        s += ((r_max)**(-3/2)) * c_ln_values[l][n] * spherical_jn(l, k_ln * r_i) * f_lmn[l][m][n]
+        s += ((r_max)**(-3/2)) * c_ln_values_without_r_max[l][n] * spherical_jn(l, k_ln * r_i) * f_lmn[l][m][n]
 
         n += 1
         k_ln = sphericalBesselZeros[l][n] / r_max
@@ -240,7 +240,7 @@ for l in range(l_max + 1):
         for n in range(n_max_l + 1):
 
             k_ln = sphericalBesselZeros[l][n] / r_max_0
-            c_ln = c_ln_values[l][n] * r_max_0**(-3/2)
+            c_ln = c_ln_values_without_r_max[l][n] * r_max_0**(-3/2)
 
             def integrand(r_val):
                 return a_lm_interp[l][m](r_val) * spherical_jn(l, k_ln*r_val) * jacobian(r_val) * r_val**2

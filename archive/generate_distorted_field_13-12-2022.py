@@ -18,7 +18,7 @@ r_max_true = 0.8
 n_max = calc_n_max_l(0, k_max, r_max_true) # There are the most modes when l=0
 
 
-c_ln_values = get_c_ln_values_without_r_max("c_ln.csv")
+c_ln_values_without_r_max = get_c_ln_values_without_r_max("c_ln.csv")
 sphericalBesselZeros = loadSphericalBesselZeros("zeros.csv")
 
 # %%
@@ -43,8 +43,9 @@ def f_of_r(r_true, theta, phi, f_lmn_true, l_max, k_max, r_max):
                     f_lmn_value = f_lmn_true[l][m][n]
 
                 k_ln = sphericalBesselZeros[l][n] / r_max
+                c_ln = ((r_max)**(-3/2)) * c_ln_values_without_r_max[l][n]
 
-                total += f_lmn_value * c_ln_values[l][n] * spherical_jn(l, k_ln * r_true) * sph_harm(m, l, theta, phi)
+                total += f_lmn_value * c_ln * spherical_jn(l, k_ln * r_true) * sph_harm(m, l, theta, phi)
 
     return total
 
@@ -73,8 +74,9 @@ def f_of_z(z, rOfZ, theta, phi, f_lmn_true, l_max, k_max, r_max):
                     f_lmn_value = f_lmn_true[l][m][n]
 
                 k_ln = sphericalBesselZeros[l][n] / r_max
+                c_ln = ((r_max)**(-3/2)) * c_ln_values_without_r_max[l][n]
 
-                total += f_lmn_value * c_ln_values[l][n] * spherical_jn(l, k_ln * rOfZ(z)) * sph_harm(m, l, theta, phi)
+                total += f_lmn_value * c_ln * spherical_jn(l, k_ln * rOfZ(z)) * sph_harm(m, l, theta, phi)
 
     return total
 
@@ -115,7 +117,7 @@ def a_lm(r_i, l, m, k_max, r_max, f_lmn):
 
     while k_ln < k_max:
 
-        s += ((r_max)**(-3/2)) * c_ln_values[l][n] * spherical_jn(l, k_ln * r_i) * f_lmn[l][m][n]
+        s += ((r_max)**(-3/2)) * c_ln_values_without_r_max[l][n] * spherical_jn(l, k_ln * r_i) * f_lmn[l][m][n]
 
         n += 1
         k_ln = sphericalBesselZeros[l][n] / r_max
@@ -264,7 +266,7 @@ for l in range(l_max + 1):
     for m in range(l + 1):
         for n in range(n_max_l + 1):
             k_ln = sphericalBesselZeros[l][n] / r_max_0
-            c_ln = c_ln_values[l][n]
+            c_ln = ((r_max_0)**(-3/2)) * c_ln_values_without_r_max[l][n]
 
             def real_integrand(r0):
                 return spherical_jn(l, k_ln * r0) * r0*r0 * a_lm_real_interps[l][m](r0)
@@ -298,7 +300,7 @@ np.save("f_lmn_0_values_true-0.5_fiducial-0.48.npy", f_lmn_0)
 l, m, n = 1, 1, 6
 
 k_ln = sphericalBesselZeros[l][n] / r_max_0
-c_ln = c_ln_values[l][n]
+c_ln = ((r_max_0)**(-3/2)) * c_ln_values_without_r_max[l][n]
 
 def real_integrand(r0):
     return spherical_jn(l, k_ln * r0) * r0*r0 * a_lm_real_interps[l][m](r0)
