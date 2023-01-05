@@ -41,7 +41,7 @@ def calc_W_1st_term(n, n_prime, l, r_max, R, Nsplit=10, epsabs=1.49e-8):
 
     integral = computeIntegralSplit(W_integrand, Nsplit, r_max, epsabs)
 
-    return np.pow(r_max, -3) * c_ln_values_without_r_max[l][n] * c_ln_values_without_r_max[l][n_prime] * integral
+    return np.power(r_max, -3) * c_ln_values_without_r_max[l][n] * c_ln_values_without_r_max[l][n_prime] * integral
 
 
 # Computes the second term in the integral for W
@@ -61,7 +61,7 @@ def calc_W_2nd_term_without_delta_omega_m(n, n_prime, l, r_max, R, dr_domega, Ns
     # integral, error = quad(integrand, 0, r_max)
     integral = computeIntegralSplit(W_integrand, Nsplit, r_max, epsabs)
 
-    return np.pow(r_max, -3) * c_ln_values_without_r_max[l][n] * c_ln_values_without_r_max[l][n_prime] * integral
+    return np.power(r_max, -3) * c_ln_values_without_r_max[l][n] * c_ln_values_without_r_max[l][n_prime] * integral
 
 
 def calc_all_W_1st_terms(l_max, k_max, r_max, R):
