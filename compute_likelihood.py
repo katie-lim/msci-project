@@ -46,7 +46,7 @@ def computeIntegralSplit(integrand, N, upperLimit, epsabs=1.49e-8):
 #     # integral, error = quad(integrand, 0, r_max)
 #     integral = computeIntegralSplit(W_integrand, 10, r_max)
 
-#     return np.pow(r_max, -3) * c_ln_values[l][n] * c_ln_values[l][n_prime] * k_ln * d_omega_matter * integral
+#     return np.power(r_max, -3) * c_ln_values[l][n] * c_ln_values[l][n_prime] * k_ln * d_omega_matter * integral
 
 
 def calc_W_without_delta_omega_m(n, n_prime, l, r_max, dr_domega, Nsplit=10, epsabs=1.49e-8, plotIntegrand=False):
@@ -70,7 +70,7 @@ def calc_W_without_delta_omega_m(n, n_prime, l, r_max, dr_domega, Nsplit=10, eps
     # integral, error = quad(integrand, 0, r_max)
     integral = computeIntegralSplit(W_integrand, Nsplit, r_max, epsabs)
 
-    return np.pow(r_max, -3) * c_ln_values_without_r_max[l][n] * c_ln_values_without_r_max[l][n_prime] * k_ln * integral
+    return np.power(r_max, -3) * c_ln_values_without_r_max[l][n] * c_ln_values_without_r_max[l][n_prime] * k_ln * integral
 
 
 
