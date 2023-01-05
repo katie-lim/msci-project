@@ -26,7 +26,11 @@ def spherical_jn_zeros(n, m, ngrid=100000):
     if n == 0:
         # When n=0, the roots are just the roots of sin(x)
 
-        return [i*np.pi for i in range(m)]
+        # Skip the first root, which is just 0
+        # and does not produce a valid basis function
+        # Otherwise we run into errors later
+
+        return [(i+1)*np.pi for i in range(m)]
 
     else:
 

@@ -9,12 +9,6 @@ zeros = loadSphericalBesselZeros("zeros.csv")
 
 def get_c_ln(l, n):
     
-    # Handle case of c_00 separately
-    # c_00 = 0
-    # If we don't handle c_00 separately, we get a division by zero / NaN result
-    if (l == 0 and n == 0): return 0
-
-
     x_ln = zeros[l][n]
 
     c_ln = np.power((np.pi / (4 * x_ln)) * ((jv(l+1/2, x_ln))**2 - jv(l-1/2, x_ln) * jv(l+3/2, x_ln)), -1/2)
