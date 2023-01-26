@@ -101,9 +101,10 @@ def calc_all_W_2nd_terms_without_delta_omega_m(l_max, k_max, r_max, R, dr_domega
 
 def computeExpectation(l, m, n, l_prime, m_prime, n_prime, k_max, r_max, omega_matter, omega_matter_0, P, W_1st_terms, W_2nd_terms_without_delta_omega_m):
 
-    if (l == l_prime and m == m_prime):
+    answer = 0
 
-        answer = 0
+    # Signal term
+    if (l == l_prime and m == m_prime):
 
         delta_omega_matter = (omega_matter_0 - omega_matter)
 
@@ -117,13 +118,12 @@ def computeExpectation(l, m, n, l_prime, m_prime, n_prime, k_max, r_max, omega_m
 
             answer += W_n_nprimeprime * np.conj(W_nprime_nprimeprime) * P(k_ln_prime_prime)
 
-        return answer
-    else:
-        return 0
 
 
+    return answer
 
-def computeLikelihood(f_lmn, k_max, r_max, omega_matter, omega_matter_0, W_1st_terms, W_2nd_terms_without_delta_omega_m):
+
+def computeLikelihood(f_lmn, k_min, k_max, r_max, omega_matter, omega_matter_0, W_1st_terms, W_2nd_terms_without_delta_omega_m):
     shape = f_lmn.shape
     l_max = shape[0] - 1 # -1 to account for l=0
 
@@ -135,19 +135,21 @@ def computeLikelihood(f_lmn, k_max, r_max, omega_matter, omega_matter_0, W_1st_t
     for l in range(l_max + 1):
         # print("l =", l)
         n_max_l = calc_n_max_l(l, k_max, r_max)
+        n_min_l = calc_n_max_l(l, k_min, r_max)
+        # print("l = %d, %d <= n <= %d" % (l, n_min_l, n_max_l))
         
         # Stop if there are no more modes
         if (n_max_l == -1): break
 
 
         # Construct the block of the covariance matrix for this l
-        sigma_l = np.zeros((n_max_l + 1, n_max_l + 1))
+        sigma_l = np.zeros((n_max_l + 1 - n_min_l, n_max_l + 1 - n_min_l))
 
 
-        for n1 in range(n_max_l + 1):
-            for n2 in range(n_max_l + 1):
+        for n1 in range(n_min_l, n_max_l + 1):
+            for n2 in range(n_min_l, n_max_l + 1):
 
-                sigma_l[n1][n2] = computeExpectation(l, 0, n1, l, 0, n2, k_max, r_max, omega_matter, omega_matter_0, p, W_1st_terms, W_2nd_terms_without_delta_omega_m)
+                sigma_l[n1 - n_min_l][n2 - n_min_l] = computeExpectation(l, 0, n1, l, 0, n2, k_max, r_max, omega_matter, omega_matter_0, p, W_1st_terms, W_2nd_terms_without_delta_omega_m)
                 # Set l = l' and m = m' = 0 since the expectation does not vary with m
 
 
@@ -196,16 +198,16 @@ def computeLikelihood(f_lmn, k_max, r_max, omega_matter, omega_matter_0, W_1st_t
                 # Handle m = 0 separately
                 # since for m = 0, the coefficients must be real
                 if m == 0:
-                    for n in range(n_max_l + 1):
+                    for n in range(n_min_l, n_max_l + 1):
                         data_block.append(f_lmn[l][m][n])
                 else:
                     # Real block
                     if re_im == 0:
-                        for n in range(n_max_l + 1):
+                        for n in range(n_min_l, n_max_l + 1):
                             data_block.append(np.real(f_lmn[l][m][n]))
                     # Imag block
                     else:
-                        for n in range(n_max_l + 1):
+                        for n in range(n_min_l, n_max_l + 1):
                             data_block.append(np.imag(f_lmn[l][m][n]))
 
 

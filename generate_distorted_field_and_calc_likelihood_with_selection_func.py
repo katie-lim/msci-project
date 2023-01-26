@@ -16,10 +16,11 @@ from distance_redshift_relation import *
 
 
 l_max = 15
-k_max = 100
-r_max_true = 0.8
+k_min = 100
+k_max = 200
+r_max_true = 0.75
 n_max = calc_n_max_l(0, k_max, r_max_true) # There are the most modes when l=0
-R = 0.5 # Selection function scale length
+R = 0.25 # Selection function scale length
 
 
 c_ln_values_without_r_max = get_c_ln_values_without_r_max("c_ln.csv")
@@ -118,7 +119,7 @@ for i in range(len(radii_true)):
 # --------------- OBSERVED
 
 
-omega_matter_0 = 0.48
+omega_matter_0 = 0.5
 
 r_of_z_fiducial = getInterpolatedRofZ(omega_matter_0)
 radii_fiducial = r_of_z_fiducial(z_true)
@@ -323,7 +324,7 @@ W_2nd_terms_without_delta_omega_m = calc_all_W_2nd_terms_without_delta_omega_m (
 
 # %%
 
-likelihoods = [computeLikelihood(f_lmn_0, k_max, r_max_0, omega_m, omega_matter_0, W_1st_terms, W_2nd_terms_without_delta_omega_m) for omega_m in omega_matters]
+likelihoods = [computeLikelihood(f_lmn_0, k_min, k_max, r_max_0, omega_m, omega_matter_0, W_1st_terms, W_2nd_terms_without_delta_omega_m) for omega_m in omega_matters]
 
 # Convert from complex numbers to floats
 likelihoods = np.real(likelihoods)
@@ -342,7 +343,7 @@ plt.plot(omega_matters, likelihoods)
 # plt.plot(omega_matters, likelihoods, '.')
 plt.xlabel("$\Omega_m$")
 plt.ylabel("ln L")
-plt.title("ln L($\Omega_m$)\n$\Omega_m^{true}$=%.2f\n$\Omega_m^{fiducial}}$=%.2f\n$l_{max}$=%d, $k_{max}$=%.1f, $r_{max}^0$=%.2f ($z_{max}$=%.2f), $R$=%.3f, $n_{max,0}$=%d" % (omega_matter_true, omega_matter_0, l_max, k_max, r_max_0, z_max, R, n_max))
+plt.title("ln L($\Omega_m$)\n$\Omega_m^{true}$=%.2f\n$\Omega_m^{fiducial}}$=%.2f\n$l_{max}$=%d, $k_{min}$=%.1f, $k_{max}$=%.1f, $r_{max}^0$=%.2f ($z_{max}$=%.2f), $R$=%.3f, $n_{max,0}$=%d" % (omega_matter_true, omega_matter_0, l_max, k_min, k_max, r_max_0, z_max, R, n_max))
 plt.show()
 # %%
 
@@ -371,7 +372,7 @@ plt.figure(dpi=200)
 plt.plot(omega_matters, np.exp(delta_lnL))
 plt.xlabel("$\Omega_m$")
 plt.ylabel("L/L$_{peak}$")
-plt.title("L($\Omega_m$)/L$_{peak}$\n$\Omega_m^{true}$=%.2f\n$\Omega_m^{fiducial}}$=%.2f\n$l_{max}$=%d, $k_{max}$=%.1f, $r_{max}^0$=%.2f ($z_{max}$=%.2f), $R$=%.3f, $n_{max,0}$=%d" % (omega_matter_true, omega_matter_0, l_max, k_max, r_max_0, z_max, R, n_max))
+plt.title("L($\Omega_m$)/L$_{peak}$\n$\Omega_m^{true}$=%.2f\n$\Omega_m^{fiducial}}$=%.2f\n$l_{max}$=%d, $k_{min}$=%.1f, $k_{max}$=%.1f, $r_{max}^0$=%.2f ($z_{max}$=%.2f), $R$=%.3f, $n_{max,0}$=%d" % (omega_matter_true, omega_matter_0, l_max, k_min, k_max, r_max_0, z_max, R, n_max))
 plt.show()
 
 # %%
@@ -395,7 +396,7 @@ plt.plot(omega_matters, quadratic(omega_matters, *params), label="Gaussian fit")
 
 plt.xlabel("$\Omega_m$")
 plt.ylabel("$\Delta$ ln L")
-plt.title("$\Delta$ ln L($\Omega_m$)\n$\Omega_m^{true}$=%.2f\n$\Omega_m^{fiducial}}$=%.2f\n$l_{max}$=%d, $k_{max}$=%.1f, $r_{max}^0$=%.2f ($z_{max}$=%.2f), $R$=%.3f, $n_{max,0}$=%d" % (omega_matter_true, omega_matter_0, l_max, k_max, r_max_0, z_max, R, n_max))
+plt.title("$\Delta$ ln L($\Omega_m$)\n$\Omega_m^{true}$=%.2f\n$\Omega_m^{fiducial}}$=%.2f\n$l_{max}$=%d, $k_{min}$=%.1f, $k_{max}$=%.1f, $r_{max}^0$=%.2f ($z_{max}$=%.2f), $R$=%.3f, $n_{max,0}$=%d" % (omega_matter_true, omega_matter_0, l_max, k_min, k_max, r_max_0, z_max, R, n_max))
 plt.legend()
 plt.show()
 
