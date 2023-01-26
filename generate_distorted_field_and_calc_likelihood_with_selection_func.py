@@ -4,6 +4,7 @@ import pyshtools as pysh
 import numpy as np
 from scipy.special import spherical_jn
 from scipy.optimize import curve_fit
+from os import path
 
 from utils import calc_n_max_l, phi, plotField
 from generate_f_lmn import generate_f_lmn
@@ -248,6 +249,17 @@ np.save(saveFileName, f_lmn_0)
 # %%
 
 # Or, load f_lmn_0 from a file
+omega_matter_true = 0.5
+omega_matter_0 = 0.5
+l_max = 15
+k_max = 300
+r_max_true = 0.75
+R = 0.25
+
+saveFileName = "f_lmn_0_true-%.3f_fiducial-%.3f_l_max-%d_k_max-%.2f_r_max_true-%.3f_R-%.3f_with_phi.npy" % (omega_matter_true, omega_matter_0, l_max, k_max, r_max_true, R)
+
+f_lmn_0 = np.load(saveFileName)
+
 # f_lmn_0_loaded = np.load("f_lmn_0_true-0.5_fiducial-0.48_l_max-15_k_max-100_r_max_true-0.8.npy")
 # f_lmn_0_loaded = np.load("f_lmn_0_true-0.500_fiducial-0.480_l_max-15_k_max-100.00_r_max_true-0.800.npy")
 
@@ -286,9 +298,27 @@ omega_matters = np.linspace(omega_matter_0 - 0.03, omega_matter_0 + 0.03, 96)
 
 dr_domega = getPartialRbyOmegaMatterInterp(omega_matter_0)
 
-W_1st_terms = calc_all_W_1st_terms(l_max, k_max, r_max_0, R)
+# Compute the W's
+# If we've already computed them for these parameters before, then simply load them
+# If not, compute the W's for these parameters and save them for future re-use
 
+W_1st_terms_saveFileName = "W_1st_terms_l_max-%d_k_max-%.2f_r_max_0-%.4f_R-%.3f.npy" % (l_max, k_max, r_max_0, R)
+W_2nd_terms_without_delta_omega_m_saveFileName = "W_2nd_terms_without_delta_omega_m_l_max-%d_k_max-%.2f_r_max_0-%.4f_R-%.3f.npy" % (l_max, k_max, r_max_0, R)
+
+
+if path.exists(W_1st_terms_saveFileName):
+    W_1st_terms = np.load(W_1st_terms_saveFileName)
+else:
+W_1st_terms = calc_all_W_1st_terms(l_max, k_max, r_max_0, R)
+    np.save(W_1st_terms_saveFileName, W_1st_terms)
+
+
+if path.exists(W_2nd_terms_without_delta_omega_m_saveFileName):
+    W_2nd_terms_without_delta_omega_m = np.load(W_2nd_terms_without_delta_omega_m_saveFileName)
+else:
 W_2nd_terms_without_delta_omega_m = calc_all_W_2nd_terms_without_delta_omega_m (l_max, k_max, r_max_0, R, dr_domega)
+    np.save(W_2nd_terms_without_delta_omega_m_saveFileName, W_2nd_terms_without_delta_omega_m)
+
 
 
 # %%
