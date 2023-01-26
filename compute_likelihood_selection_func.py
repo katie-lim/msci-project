@@ -181,6 +181,8 @@ def computeLikelihood(f_lmn, k_max, r_max, omega_matter, omega_matter_0, W_1st_t
 
 
         for m in range(l + 1):
+            if (l == 0) and (m == 0): continue
+
             # print("m =", m)
             for re_im in range(2):
                 # For m = 0, the coeffs must be real
