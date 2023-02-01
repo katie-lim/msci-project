@@ -10,7 +10,7 @@ from utils import calc_n_max_l, phi, plotField
 from generate_f_lmn import generate_f_lmn
 from precompute_c_ln import get_c_ln_values_without_r_max
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
-from compute_likelihood_selection_func import calc_all_W_1st_terms, calc_all_W_2nd_terms_without_delta_omega_m, computeLikelihood
+from compute_likelihood_selection_func_shot_noise import calc_all_W_1st_terms, calc_all_W_2nd_terms_without_delta_omega_m, computeLikelihood
 
 from distance_redshift_relation import *
 
@@ -21,6 +21,7 @@ k_max = 200
 r_max_true = 0.75
 n_max = calc_n_max_l(0, k_max, r_max_true) # There are the most modes when l=0
 R = 0.25 # Selection function scale length
+nbar = 5
 
 
 c_ln_values_without_r_max = get_c_ln_values_without_r_max("c_ln.csv")
@@ -119,7 +120,7 @@ for i in range(len(radii_true)):
 # --------------- OBSERVED
 
 
-omega_matter_0 = 0.5
+omega_matter_0 = 0.50
 
 r_of_z_fiducial = getInterpolatedRofZ(omega_matter_0)
 radii_fiducial = r_of_z_fiducial(z_true)
@@ -246,6 +247,7 @@ print(f_lmn_0)
 saveFileName = "f_lmn_0_true-%.3f_fiducial-%.3f_l_max-%d_k_max-%.2f_r_max_true-%.3f_R-%.3f_with_phi" % (omega_matter_true, omega_matter_0, l_max, k_max, r_max_true, R)
 
 np.save(saveFileName, f_lmn_0)
+print("Done! File saved to %s" % saveFileName)
 
 # %%
 
@@ -293,7 +295,7 @@ f_lmn_0 = np.load(saveFileName)
 
 # Calculate likelihood
 
-omega_matters = np.linspace(omega_matter_0 - 0.03, omega_matter_0 + 0.03, 96)
+omega_matters = np.linspace(omega_matter_0 - 0.015, omega_matter_0 + 0.015, 71)
 
 # %%
 
@@ -310,21 +312,21 @@ W_2nd_terms_without_delta_omega_m_saveFileName = "W_2nd_terms_without_delta_omeg
 if path.exists(W_1st_terms_saveFileName):
     W_1st_terms = np.load(W_1st_terms_saveFileName)
 else:
-W_1st_terms = calc_all_W_1st_terms(l_max, k_max, r_max_0, R)
+    W_1st_terms = calc_all_W_1st_terms(l_max, k_max, r_max_0, R)
     np.save(W_1st_terms_saveFileName, W_1st_terms)
 
 
 if path.exists(W_2nd_terms_without_delta_omega_m_saveFileName):
     W_2nd_terms_without_delta_omega_m = np.load(W_2nd_terms_without_delta_omega_m_saveFileName)
 else:
-W_2nd_terms_without_delta_omega_m = calc_all_W_2nd_terms_without_delta_omega_m (l_max, k_max, r_max_0, R, dr_domega)
+    W_2nd_terms_without_delta_omega_m = calc_all_W_2nd_terms_without_delta_omega_m (l_max, k_max, r_max_0, R, dr_domega)
     np.save(W_2nd_terms_without_delta_omega_m_saveFileName, W_2nd_terms_without_delta_omega_m)
 
 
 
 # %%
 
-likelihoods = [computeLikelihood(f_lmn_0, k_min, k_max, r_max_0, omega_m, omega_matter_0, W_1st_terms, W_2nd_terms_without_delta_omega_m) for omega_m in omega_matters]
+likelihoods = [computeLikelihood(f_lmn_0, k_min, k_max, r_max_0, omega_m, omega_matter_0, W_1st_terms, W_2nd_terms_without_delta_omega_m, nbar) for omega_m in omega_matters]
 
 # Convert from complex numbers to floats
 likelihoods = np.real(likelihoods)
@@ -343,7 +345,7 @@ plt.plot(omega_matters, likelihoods)
 # plt.plot(omega_matters, likelihoods, '.')
 plt.xlabel("$\Omega_m$")
 plt.ylabel("ln L")
-plt.title("ln L($\Omega_m$)\n$\Omega_m^{true}$=%.2f\n$\Omega_m^{fiducial}}$=%.2f\n$l_{max}$=%d, $k_{min}$=%.1f, $k_{max}$=%.1f, $r_{max}^0$=%.2f ($z_{max}$=%.2f), $R$=%.3f, $n_{max,0}$=%d" % (omega_matter_true, omega_matter_0, l_max, k_min, k_max, r_max_0, z_max, R, n_max))
+plt.title("ln L($\Omega_m$)\n$\Omega_m^{true}$=%.2f\n$\Omega_m^{fiducial}}$=%.2f\n$l_{max}$=%d, $k_{min}$=%.1f, $k_{max}$=%.1f, $r_{max}^0$=%.2f ($z_{max}$=%.2f), $R$=%.3f, $\overline{n}$=%.1f, $n_{max,0}$=%d" % (omega_matter_true, omega_matter_0, l_max, k_min, k_max, r_max_0, z_max, R, nbar, n_max))
 plt.show()
 # %%
 
@@ -372,7 +374,7 @@ plt.figure(dpi=200)
 plt.plot(omega_matters, np.exp(delta_lnL))
 plt.xlabel("$\Omega_m$")
 plt.ylabel("L/L$_{peak}$")
-plt.title("L($\Omega_m$)/L$_{peak}$\n$\Omega_m^{true}$=%.2f\n$\Omega_m^{fiducial}}$=%.2f\n$l_{max}$=%d, $k_{min}$=%.1f, $k_{max}$=%.1f, $r_{max}^0$=%.2f ($z_{max}$=%.2f), $R$=%.3f, $n_{max,0}$=%d" % (omega_matter_true, omega_matter_0, l_max, k_min, k_max, r_max_0, z_max, R, n_max))
+plt.title("L($\Omega_m$)/L$_{peak}$\n$\Omega_m^{true}$=%.2f\n$\Omega_m^{fiducial}}$=%.2f\n$l_{max}$=%d, $k_{min}$=%.1f, $k_{max}$=%.1f, $r_{max}^0$=%.2f ($z_{max}$=%.2f), $R$=%.3f, $\overline{n}$=%.1f, $n_{max,0}$=%d" % (omega_matter_true, omega_matter_0, l_max, k_min, k_max, r_max_0, z_max, R, nbar, n_max))
 plt.show()
 
 # %%
@@ -396,7 +398,8 @@ plt.plot(omega_matters, quadratic(omega_matters, *params), label="Gaussian fit")
 
 plt.xlabel("$\Omega_m$")
 plt.ylabel("$\Delta$ ln L")
-plt.title("$\Delta$ ln L($\Omega_m$)\n$\Omega_m^{true}$=%.2f\n$\Omega_m^{fiducial}}$=%.2f\n$l_{max}$=%d, $k_{min}$=%.1f, $k_{max}$=%.1f, $r_{max}^0$=%.2f ($z_{max}$=%.2f), $R$=%.3f, $n_{max,0}$=%d" % (omega_matter_true, omega_matter_0, l_max, k_min, k_max, r_max_0, z_max, R, n_max))
+# plt.title("$\Delta$ ln L($\Omega_m$)\n$\Omega_m^{true}$=%.2f\n$\Omega_m^{fiducial}}$=%.2f\n$l_{max}$=%d, $k_{min}$=%.1f, $k_{max}$=%.1f, $r_{max}^0$=%.2f ($z_{max}$=%.2f), $R$=%.3f, $n_{max,0}$=%d" % (omega_matter_true, omega_matter_0, l_max, k_min, k_max, r_max_0, z_max, R, n_max))
+plt.title("$\Delta$ ln L($\Omega_m$)\n$\Omega_m^{true}$=%.2f\n$\Omega_m^{fiducial}}$=%.2f\n$l_{max}$=%d, $k_{min}$=%.1f, $k_{max}$=%.1f, $r_{max}^0$=%.2f ($z_{max}$=%.2f), $R$=%.3f, $\overline{n}$=%.1f, $n_{max,0}$=%d" % (omega_matter_true, omega_matter_0, l_max, k_min, k_max, r_max_0, z_max, R, nbar, n_max))
 plt.legend()
 plt.show()
 
