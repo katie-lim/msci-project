@@ -71,6 +71,15 @@ def getInterpolatedZofR(omega_matter):
 
 
 
+def getInterpolatedR0ofR(omega_matter_0, omega_matter):
+    z_vals = np.linspace(0, 3, 1000)
+    r_vals = [r(z, omega_matter) for z in z_vals]
+    r0_vals = [r(z, omega_matter_0) for z in z_vals]
+
+    r0OfR = interp1d(r_vals, r0_vals)
+    return r0OfR
+
+
 # %%
 
 # omega_matter = 0.5
