@@ -1,47 +1,34 @@
 # %%
-import pyshtools as pysh
 
 import numpy as np
+import pyshtools as pysh
 from scipy.special import spherical_jn
 
 from generate_f_lmn import generate_f_lmn
-from precompute_c_ln import get_c_ln_values_with_r_max
+from precompute_c_ln import get_c_ln_values_without_r_max
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
+from utils import calc_n_max_l
+from distance_redshift_relation import *
 
-
-l_max = 100
-k_max = 50
-r_max = 5
-# n_max = 1000
-
-# l_max = 3
-# k_max = 10
-# r_max = 5
-# n_max = 1000
-
-c_ln_values = get_c_ln_values_with_r_max("c_ln.csv", r_max)
+c_ln_values_without_r_max = get_c_ln_values_without_r_max("c_ln.csv")
 sphericalBesselZeros = loadSphericalBesselZeros("zeros.csv")
-f_lmn = generate_f_lmn(l_max, r_max, k_max)
 
 
-def a_lm(r_i, l, m, k_max, r_max):
+def a_lm(r_i, l, m, k_max, r_max, f_lmn):
     s = 0
 
-    k_ln = 0
-    n = 0
+    n_max_l = calc_n_max_l(l, k_max, r_max)
 
-    while k_ln < k_max:
-
+    for n in range(n_max_l + 1):
         k_ln = sphericalBesselZeros[l][n] / r_max
 
-        s += c_ln_values[l][n] * spherical_jn(l, k_ln * r_i) * f_lmn[l][m][n]
+        s += ((r_max)**(-3/2)) * c_ln_values_without_r_max[l][n] * spherical_jn(l, k_ln * r_i) * f_lmn[l][m][n]
 
-        n += 1
 
     return s
 
 
-def calcCoeffs(r_i, l_max, k_max, r_max):
+def calcSphHarmCoeffs(r_i, l_max, k_max, r_max, f_lmn):
     cilm = np.zeros((2, l_max + 1, l_max + 1))
 
     for l in range(l_max + 1):
@@ -49,7 +36,7 @@ def calcCoeffs(r_i, l_max, k_max, r_max):
         # We don't need to supply the -ve m
         # Since we are working with real fields
         for m in range(l + 1):
-            coeff = a_lm(r_i, l, m, k_max, r_max)
+            coeff = a_lm(r_i, l, m, k_max, r_max, f_lmn)
 
             cilm[0][l][m] = np.real(coeff)
             cilm[1][l][m] = np.imag(coeff)
@@ -58,80 +45,54 @@ def calcCoeffs(r_i, l_max, k_max, r_max):
     return cilm
 
 
-# %%
+def generateTrueField(radii_true, omega_matter_true, r_max_true, l_max, k_max):
+    """
+    Generates a field f(z, theta, phi).
+    """
 
-# Do the spherical harmonic transform with pyshtools
+    f_lmn_true = generate_f_lmn(l_max, r_max_true, k_max)
 
-r_i = 3
-lmax_calc = l_max
-title = "r_i = %.2f, r_max = %.2f, k_max = %.2f, l_max = %d, lmax_calc = %d" % (r_i, r_max, k_max, l_max, lmax_calc)
-
-
-# Get the coefficients a_lm
-# in the format required by pyshtools
-cilm = calcCoeffs(r_i, l_max, k_max, r_max)
-coeffs = pysh.SHCoeffs.from_array(cilm)
-# coeffs = pysh.SHCoeffs.from_array(cilm, normalization="ortho", csphase=-1)
-# coeffs = pysh.SHCoeffs.from_array(cilm, normalization="ortho")
+    radii_true = np.linspace(0, r_max_true, 1000)
+    true_z_of_r = getInterpolatedZofR(omega_matter_true)
+    z_true = true_z_of_r(radii_true)
 
 
-# Do the transform
-grid = coeffs.expand()
-# grid = coeffs.expand(lmax_calc=lmax_calc)
+    # Calculate the spherical harmonic coefficients for each shell
+    all_coeffs = []
+
+    for i in range(len(radii_true)):
+        r_true = radii_true[i]
+
+        cilm = calcSphHarmCoeffs(r_true, l_max, k_max, r_max_true, f_lmn_true)
+        coeffs = pysh.SHCoeffs.from_array(cilm)
+
+        all_coeffs.append(coeffs)
 
 
-# Plot the field
-fig = grid.plot(colorbar='right', title=title, show=False)
+    # Expand the coefficients & evaluate the field on a grid
+    all_grids = []
+
+    for i in range(len(radii_true)):
+        grid = all_coeffs[i].expand()
+
+        all_grids.append(grid)
 
 
-# Plot the field using the Mollweide projection
-fig = grid.plotgmt(projection='mollweide', colorbar='right', title=title)
-fig.show()
+    # Return the field we've generated
+    return (z_true, all_grids)
 
 
-# %%
+def multiplyFieldBySelectionFunction(radii_true, all_grids, phiOfR):
+    """
+    Multiply a field by the provided selection function, to produce the observed field.
+    """
 
-# Try doing the reverse transform to see if we get back the same a_lm
+    all_observed_grids = []
 
-result = grid.expand()
-# result = grid.expand(lmax_calc=lmax_calc, normalization="ortho", csphase=-1)
+    for i in range(len(radii_true)):
+        grid = all_grids[i]
 
-
-# %%
-
-result
-
-
-# %%
-
-# result.coeffs
-
-# # %%
-
-# cilm
-
-# # %%
-
-# result.coeffs - cilm
+        all_observed_grids.append(grid * phiOfR(radii_true[i]))
 
 
-# # %%
-
-# np.max(result.coeffs - cilm)
-
-
-# # %%
-
-# cilm[:, :91, :91]
-
-
-# # %%
-
-# result.coeffs - cilm[:, :91, :91]
-
-
-# %%
-
-
-# %%
-
+    return (radii_true, all_observed_grids)

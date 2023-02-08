@@ -23,7 +23,7 @@ def calc_n_max_l(l, k_max, r_max):
 
 
 # Selection function
-def phi(r, R):
+def gaussianPhi(r, R):
     return np.exp(-r*r/(2*R*R))
 
 

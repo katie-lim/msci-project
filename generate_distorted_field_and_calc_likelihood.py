@@ -1,12 +1,10 @@
 # %%
-import pyshtools as pysh
-
 import numpy as np
 from scipy.special import spherical_jn
 from scipy.optimize import curve_fit
 
 from utils import calc_n_max_l, computeIntegralSplit
-from generate_f_lmn import generate_f_lmn
+from generate_field import generateTrueField
 from precompute_c_ln import get_c_ln_values_without_r_max
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
 from compute_likelihood import calc_all_Ws_without_delta_omega_m, computeLikelihood
@@ -26,73 +24,12 @@ sphericalBesselZeros = loadSphericalBesselZeros("zeros.csv")
 # %%
 
 omega_matter_true = 0.5
-f_lmn_true = generate_f_lmn(l_max, r_max_true, k_max)
-
-# %%
-
 radii_true = np.linspace(0, r_max_true, 1000)
-true_z_of_r = getInterpolatedZofR(omega_matter_true)
-z_true = true_z_of_r(radii_true)
+
+z_true, all_grids = generateTrueField(radii_true, omega_matter_true, r_max_true, l_max, k_max)
 
 
 # %%
-
-
-def a_lm(r_i, l, m, k_max, r_max, f_lmn):
-    s = 0
-
-    n = 0
-    k_ln = sphericalBesselZeros[l][0] / r_max
-
-    while k_ln < k_max:
-
-        s += ((r_max)**(-3/2)) * c_ln_values_without_r_max[l][n] * spherical_jn(l, k_ln * r_i) * f_lmn[l][m][n]
-
-        n += 1
-        k_ln = sphericalBesselZeros[l][n] / r_max
-
-
-    return s
-
-
-def calcCoeffs(r_i, l_max, k_max, r_max, f_lmn):
-    cilm = np.zeros((2, l_max + 1, l_max + 1))
-
-    for l in range(l_max + 1):
-
-        # We don't need to supply the -ve m
-        # Since we are working with real fields
-        for m in range(l + 1):
-            coeff = a_lm(r_i, l, m, k_max, r_max, f_lmn)
-
-            cilm[0][l][m] = np.real(coeff)
-            cilm[1][l][m] = np.imag(coeff)
-
-
-    return cilm
-
-
-
-# Calculate the spherical harmonic coefficients for each shell
-all_coeffs = []
-
-for i in range(len(radii_true)):
-    r_true = radii_true[i]
-
-    cilm = calcCoeffs(r_true, l_max, k_max, r_max_true, f_lmn_true)
-    coeffs = pysh.SHCoeffs.from_array(cilm)
-
-    all_coeffs.append(coeffs)
-
-
-# Expand the coefficients & evaluate the field on a grid
-all_grids = []
-
-for i in range(len(radii_true)):
-    grid = all_coeffs[i].expand()
-
-    all_grids.append(grid)
-
 
 # ----- OBSERVED
 
