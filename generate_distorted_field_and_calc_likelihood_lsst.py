@@ -72,7 +72,7 @@ print(f_lmn_0)
 
 # %%
 
-saveFileName = "f_lmn_0_lsst_true-%.3f_fiducial-%.3f_l_max-%d_k_max-%.2f_r_max_true-%.3f" % (omega_matter_true, omega_matter_0, l_max, k_max, r_max_true)
+saveFileName = "data/f_lmn_0_lsst_true-%.3f_fiducial-%.3f_l_max-%d_k_max-%.2f_r_max_true-%.3f" % (omega_matter_true, omega_matter_0, l_max, k_max, r_max_true)
 
 np.save(saveFileName, f_lmn_0)
 print("Done! File saved to %s" % saveFileName)
