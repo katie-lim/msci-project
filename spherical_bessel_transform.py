@@ -40,7 +40,7 @@ def get_interpolated_a_lms(radii_fiducial, all_fiducial_coeffs, l_max):
         a_lm_real_interps.append(a_l_real_interps)
         a_lm_imag_interps.append(a_l_imag_interps)
 
-    return (a_lm_real_interps, a_l_imag_interps)
+    return (a_lm_real_interps, a_lm_imag_interps)
 
 
 def plot_a_lm(radii_fiducial, a_lm_real_interps, a_lm_imag_interps, l, m):
@@ -61,7 +61,7 @@ def calc_f_lmn_0(radii_fiducial, all_observed_grids, l_max, k_max, n_max):
 
 
     # Compute the a_lm(r)'s
-    a_lm_real_interps, a_lm_imag_interps = get_interpolated_a_lms(radii_fiducial, all_fiducial_coeffs)
+    a_lm_real_interps, a_lm_imag_interps = get_interpolated_a_lms(radii_fiducial, all_fiducial_coeffs, l_max)
 
 
     # Finally, compute f_lmn^0
