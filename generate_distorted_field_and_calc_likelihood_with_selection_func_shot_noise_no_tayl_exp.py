@@ -4,7 +4,6 @@ from scipy.optimize import curve_fit
 from os import path
 
 from utils import calc_n_max_l
-from generate_f_lmn import generate_f_lmn
 from precompute_c_ln import get_c_ln_values_without_r_max
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
 from compute_likelihood_selection_func_shot_noise_no_tayl_exp import calc_all_W, computeLikelihood
@@ -54,7 +53,7 @@ k_max = 300
 r_max_true = 0.75
 R = 0.25
 
-saveFileName = "f_lmn_0_true-%.3f_fiducial-%.3f_l_max-%d_k_max-%.2f_r_max_true-%.3f_R-%.3f_with_phi.npy" % (omega_matter_true, omega_matter_0, l_max, k_max, r_max_true, R)
+saveFileName = "data/f_lmn_0_true-%.3f_fiducial-%.3f_l_max-%d_k_max-%.2f_r_max_true-%.3f_R-%.3f_with_phi.npy" % (omega_matter_true, omega_matter_0, l_max, k_max, r_max_true, R)
 
 f_lmn_0 = np.load(saveFileName)
 
