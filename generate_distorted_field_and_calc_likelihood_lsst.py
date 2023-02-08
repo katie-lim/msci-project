@@ -95,6 +95,7 @@ for omega_matter in omega_matters:
     if path.exists(W_saveFileName):
         W = np.load(W_saveFileName)
     else:
+        print("Computing W's for Ωₘ = %.3f." % omega_matter)
         r0OfR = getInterpolatedR0ofR(omega_matter_0, omega_matter)
         W = calc_all_W(l_max, k_max, r_max_0, phiOfR0, r0OfR)
         np.save(W_saveFileName, W)
@@ -103,12 +104,12 @@ for omega_matter in omega_matters:
     if path.exists(S_saveFileName):
         S = np.load(S_saveFileName)
     else:
-        r0OfR = getInterpolatedR0ofR(omega_matter_0, omega_matter)
+        print("Computing S's for Ωₘ = %.3f." % omega_matter)
         S = calc_all_S(l_max, k_max, r_max_0, phiOfR0)
         np.save(S_saveFileName, S)
 
 
-    print("Computing likelihood for Ωₘ = %.3f" % omega_matter)
+    print("Computing likelihood for Ωₘ = %.3f." % omega_matter)
     likelihood = computeLikelihood(f_lmn_0, k_min, k_max, r_max_0, W, S, nbar)
     logLikelihoods.append(likelihood)
 
@@ -124,3 +125,5 @@ title = "LSST, $\Omega_m^{true}$=%.2f\n$\Omega_m^{fiducial}}$=%.2f\n$l_{max}$=%d
 # Plot and analyse the log likelihood function
 
 plotLikelihoodResults(omega_matters, logLikelihoods, omega_matter_true, title)
+
+# %%
