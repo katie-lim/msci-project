@@ -1,5 +1,6 @@
 # %%
 import numpy as np
+from scipy.integrate import quad
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
 
 sphericalBesselZeros = loadSphericalBesselZeros("zeros.csv")
@@ -24,6 +25,19 @@ def calc_n_max_l(l, k_max, r_max):
 # Selection function
 def phi(r, R):
     return np.exp(-r*r/(2*R*R))
+
+
+# The default error tolerance used by scipy.quad is epsabs=1.49e-8
+def computeIntegralSplit(integrand, N, upperLimit, epsabs=1.49e-8):
+    answer = 0
+    step = upperLimit / N
+
+    for i in range(N):
+        integral, error = quad(integrand, i*step, (i+1)*step, epsabs=epsabs)
+        answer += integral
+        # print(error)
+
+    return answer
 
 
 def plotField(grid, r_i, r_max, k_max, l_max, lmax_calc):

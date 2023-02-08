@@ -2,7 +2,7 @@
 import numpy as np
 from scipy.special import spherical_jn
 
-from utils import calc_n_max_l
+from utils import calc_n_max_l, computeIntegralSplit
 from generate_f_lmn import generate_f_lmn
 from precompute_c_ln import get_c_ln_values_without_r_max
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
@@ -127,18 +127,6 @@ plt.xlabel("r_0")
 plt.title("a_%d,%d(r_0)" % (l_test, m_test))
 plt.legend()
 plt.show()
-
-# %%
-
-
-def computeIntegralSplit(integrand, N, upperLimit):
-    answer = 0
-    step = upperLimit / N
-
-    for i in range(N):
-        answer += quad(integrand, i*step, (i+1)*step)[0]
-
-    return answer
 
 
 # %%

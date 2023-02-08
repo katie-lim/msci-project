@@ -2,10 +2,9 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.integrate import quad
 from scipy.special import spherical_jn
 
-from utils import calc_n_max_l
+from utils import calc_n_max_l, computeIntegralSplit
 from precompute_c_ln import get_c_ln_values_without_r_max
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
 from generate_f_lmn import p
@@ -18,18 +17,6 @@ sphericalBesselZeros = loadSphericalBesselZeros("zeros.csv")
 # omega_matter = 0.5
 # omega_matter_0 = 0.2
 
-
-# The default error tolerance used by scipy.quad is epsabs=1.49e-8
-def computeIntegralSplit(integrand, N, upperLimit, epsabs=1.49e-8):
-    answer = 0
-    step = upperLimit / N
-
-    for i in range(N):
-        integral, error = quad(integrand, i*step, (i+1)*step, epsabs=epsabs)
-        answer += integral
-        # print(error)
-
-    return answer
 
 
 # def calc_W(n, n_prime, l, r_max, omega_matter, omega_matter_0, dr_domega):
