@@ -1,6 +1,5 @@
 # %%
 import numpy as np
-from scipy.optimize import curve_fit
 
 from utils import calc_n_max_l
 from generate_field import generateTrueField
@@ -8,7 +7,7 @@ from spherical_bessel_transform import calc_f_lmn_0
 from precompute_c_ln import get_c_ln_values_without_r_max
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
 from compute_likelihood import calc_all_Ws_without_delta_omega_m, computeLikelihood
-
+from plot_likelihood_results import plotLikelihoodResults
 from distance_redshift_relation import *
 
 
@@ -98,10 +97,8 @@ Ws_without_delta_omega_m = calc_all_Ws_without_delta_omega_m(l_max, k_max, r_max
 
 # %%
 
-likelihoods = [computeLikelihood(f_lmn_0_loaded, k_max, r_max_0, omega_m, omega_matter_0, Ws_without_delta_omega_m) for omega_m in omega_matters]
+logLikelihoods = [computeLikelihood(f_lmn_0_loaded, k_max, r_max_0, omega_m, omega_matter_0, Ws_without_delta_omega_m) for omega_m in omega_matters]
 
-# Convert from complex numbers to floats
-likelihoods = np.real(likelihoods)
 
 # %%
 
@@ -109,71 +106,11 @@ likelihoods = np.real(likelihoods)
 # (assuming the fiducial cosmology)
 z_max = getInterpolatedZofR(omega_matter_0)(r_max_0)
 
-
-# Plot the log likelihood function
-
-plt.figure(dpi=200)
-plt.plot(omega_matters, likelihoods)
-# plt.plot(omega_matters, likelihoods, '.')
-plt.xlabel("$\Omega_m$")
-plt.ylabel("ln L")
-plt.title("ln L($\Omega_m$)\n$\Omega_m^{true}$=%.2f\n$\Omega_m^{fiducial}}$=%.2f\n$l_{max}$=%d, $k_{max}$=%.1f, $r_{max}^0$=%.2f ($z_{max}$=%.2f), $n_{max,0}$=%d" % (omega_matter_true, omega_matter_0, l_max, k_max, r_max_0, z_max, n_max))
-plt.show()
-# %%
+title = "$\Omega_m^{true}$=%.2f\n$\Omega_m^{fiducial}}$=%.2f\n$l_{max}$=%d, $k_{max}$=%.1f, $r_{max}^0$=%.2f ($z_{max}$=%.2f), $n_{max,0}$=%d" % (omega_matter_true, omega_matter_0, l_max, k_max, r_max_0, z_max, n_max)
 
 
-# Find the maximum
-peak_index = np.argmax(likelihoods)
-omega_m_peak = omega_matters[peak_index]
-print("Peak is at Ωₘ = %.4f" % omega_m_peak)
+# Plot and analyse the log likelihood function
 
-# Find the index of the true Ωₘ
-true_index = np.argmin(np.abs(omega_matters - omega_matter_true))
+plotLikelihoodResults(omega_matters, logLikelihoods, omega_matter_true, title)
 
-print("ln L(true Ωₘ) = %.3f" % np.real(likelihoods[true_index]))
-print("ln L(peak Ωₘ) = %.3f" % np.real(likelihoods[peak_index]))
-print("ln L(true Ωₘ) - ln L(peak Ωₘ) = %.3f" % np.real(likelihoods[true_index] - likelihoods[peak_index]))
-print("L(true Ωₘ) / L(peak Ωₘ) = %.3e" % np.exp(np.real(likelihoods[true_index] - likelihoods[peak_index])))
-
-# %%
-
-# Plot the likelihood
-lnL_peak = likelihoods[peak_index]
-delta_lnL = likelihoods - lnL_peak
-
-
-plt.figure(dpi=200)
-plt.plot(omega_matters, np.exp(delta_lnL))
-plt.xlabel("$\Omega_m$")
-plt.ylabel("L/L$_{peak}$")
-plt.title("L($\Omega_m$)/L$_{peak}$\n$\Omega_m^{true}$=%.2f\n$\Omega_m^{fiducial}}$=%.2f\n$l_{max}$=%d, $k_{max}$=%.1f, $r_{max}^0$=%.2f ($z_{max}$=%.2f), $n_{max,0}$=%d" % (omega_matter_true, omega_matter_0, l_max, k_max, r_max_0, z_max, n_max))
-plt.show()
-
-# %%
-
-# Estimate the width, sigma
-
-def quadratic(x, sigma):
-    return -1/2 * ((x - omega_m_peak)/sigma)**2
-
-
-params, cov = curve_fit(quadratic, omega_matters, delta_lnL, [1])
-sigma = np.abs(params[0])
-
-print("σ = %.5f" % sigma)
-
-# %%
-
-plt.figure(dpi=200)
-plt.plot(omega_matters, delta_lnL, ".", label="$\Delta$ ln L")
-plt.plot(omega_matters, quadratic(omega_matters, *params), label="Gaussian fit")
-
-plt.xlabel("$\Omega_m$")
-plt.ylabel("$\Delta$ ln L")
-plt.title("$\Delta$ ln L($\Omega_m$)\n$\Omega_m^{true}$=%.2f\n$\Omega_m^{fiducial}}$=%.2f\n$l_{max}$=%d, $k_{max}$=%.1f, $r_{max}^0$=%.2f ($z_{max}$=%.2f), $n_{max,0}$=%d" % (omega_matter_true, omega_matter_0, l_max, k_max, r_max_0, z_max, n_max))
-plt.legend()
-plt.show()
-
-
-print("Result: Ωₘ = %.5f +/- %.5f" % (omega_m_peak, sigma))
 # %%
