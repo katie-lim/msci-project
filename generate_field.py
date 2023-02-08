@@ -92,7 +92,7 @@ def multiplyFieldBySelectionFunction(radii_true, all_grids, phiOfR):
     for i in range(len(radii_true)):
         grid = all_grids[i]
 
-        all_observed_grids.append(grid * phiOfR(radii_true[i]))
+        all_observed_grids.append(grid * float(phiOfR(radii_true[i])))
 
 
     return (radii_true, all_observed_grids)
