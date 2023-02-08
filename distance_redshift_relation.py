@@ -200,43 +200,43 @@ def getPartialRbyOmegaMatterInterp(omega_matter):
 
 # %%
 
-omega_matters = [0.3, 0.4, 0.5, 0.6, 0.7]
-z_vals = np.linspace(0, 1, 1000)
+# omega_matters = [0.3, 0.4, 0.5, 0.6, 0.7]
+# z_vals = np.linspace(0, 1, 1000)
 
-for omega_m in omega_matters:
-    r_of_z_interp = getInterpolatedRofZ(omega_m)
+# for omega_m in omega_matters:
+#     r_of_z_interp = getInterpolatedRofZ(omega_m)
 
-    plt.plot(z_vals, r_of_z_interp(z_vals), label="Ωₘ = %.3f" % omega_m)
+#     plt.plot(z_vals, r_of_z_interp(z_vals), label="Ωₘ = %.3f" % omega_m)
 
-plt.legend()
-plt.xlabel("z")
-plt.ylabel("r(z)")
-plt.show()
+# plt.legend()
+# plt.xlabel("z")
+# plt.ylabel("r(z)")
+# plt.show()
 
-# %%
+# # %%
 
-r_vals = np.linspace(0, 0.8, 1000)
+# r_vals = np.linspace(0, 0.8, 1000)
 
-for omega_m in omega_matters:
-    z_of_r_interp = getInterpolatedZofR(omega_m)
+# for omega_m in omega_matters:
+#     z_of_r_interp = getInterpolatedZofR(omega_m)
 
-    plt.plot(r_vals, z_of_r_interp(r_vals), label="Ωₘ = %.3f" % omega_m)
+#     plt.plot(r_vals, z_of_r_interp(r_vals), label="Ωₘ = %.3f" % omega_m)
 
-plt.legend()
-plt.xlabel("r")
-plt.ylabel("z(r)")
-plt.show()
+# plt.legend()
+# plt.xlabel("r")
+# plt.ylabel("z(r)")
+# plt.show()
 
-# %%
+# # %%
 
-for omega_m in omega_matters:
-    dr_domega_interp = getPartialRbyOmegaMatterInterp(omega_m)
+# for omega_m in omega_matters:
+#     dr_domega_interp = getPartialRbyOmegaMatterInterp(omega_m)
 
-    plt.plot(r_vals, dr_domega_interp(r_vals), label="Ωₘ = %.3f" % omega_m)
+#     plt.plot(r_vals, dr_domega_interp(r_vals), label="Ωₘ = %.3f" % omega_m)
 
-plt.legend()
-plt.xlabel("r")
-plt.ylabel("$\partial r / \partial \Omega_m$ at r")
-plt.show()
+# plt.legend()
+# plt.xlabel("r")
+# plt.ylabel("$\partial r / \partial \Omega_m$ at r")
+# plt.show()
 
 # %%
