@@ -52,7 +52,6 @@ def generateTrueField(radii_true, omega_matter_true, r_max_true, l_max, k_max):
 
     f_lmn_true = generate_f_lmn(l_max, r_max_true, k_max)
 
-    radii_true = np.linspace(0, r_max_true, 1000)
     true_z_of_r = getInterpolatedZofR(omega_matter_true)
     z_true = true_z_of_r(radii_true)
 
