@@ -30,7 +30,7 @@ def r(z, omega_matter):
 
 
 def plotRofZ(omega_matter):
-    z_vals = np.linspace(0, 4, 1000)
+    z_vals = np.linspace(0, 5, 2001)
     r_vals = [r(z, omega_matter) for z in z_vals]
 
     plt.plot(z_vals, r_vals)
@@ -42,7 +42,7 @@ def plotRofZ(omega_matter):
 
 
 def plotZofR(omega_matter):
-    z_vals = np.linspace(0, 4, 1000)
+    z_vals = np.linspace(0, 5, 2001)
     r_vals = [r(z, omega_matter) for z in z_vals]
 
     plt.plot(r_vals, z_vals)
@@ -54,7 +54,7 @@ def plotZofR(omega_matter):
 
 
 def getInterpolatedRofZ(omega_matter):
-    z_vals = np.linspace(0, 4, 1000)
+    z_vals = np.linspace(0, 5, 2001)
     r_vals = [r(z, omega_matter) for z in z_vals]
 
     r_interp = interp1d(z_vals, r_vals)
@@ -63,7 +63,7 @@ def getInterpolatedRofZ(omega_matter):
 
 
 def getInterpolatedZofR(omega_matter):
-    z_vals = np.linspace(0, 4, 1000)
+    z_vals = np.linspace(0, 5, 2001)
     r_vals = [r(z, omega_matter) for z in z_vals]
 
     z_interp = interp1d(r_vals, z_vals)
@@ -72,7 +72,7 @@ def getInterpolatedZofR(omega_matter):
 
 
 def getInterpolatedR0ofR(omega_matter_0, omega_matter):
-    z_vals = np.linspace(0, 4, 1000)
+    z_vals = np.linspace(0, 5, 2001)
     r_vals = [r(z, omega_matter) for z in z_vals]
     r0_vals = [r(z, omega_matter_0) for z in z_vals]
 
@@ -90,14 +90,14 @@ def getInterpolatedR0ofR(omega_matter_0, omega_matter):
 # %%
 
 def calculate_dr0Bydz(omega_matter_0):
-    z_vals = np.linspace(0, 4, 1000)
+    z_vals = np.linspace(0, 5, 2001)
     r0_vals = [r(z, omega_matter_0) for z in z_vals]
 
     u = InterpolatedUnivariateSpline(z_vals, r0_vals, k=2)
     dr0Bydz = u.derivative()
 
-    plt.plot(z_vals, dr0Bydz(z_vals))
-    plt.show()
+    # plt.plot(z_vals, dr0Bydz(z_vals))
+    # plt.show()
 
     return dr0Bydz
 
@@ -161,7 +161,7 @@ def partialRbyOmegaMatter(omega_matter, zOfR0):
 
 
 def plotPartialRbyOmegaMatter(omega_matter):
-    z_vals = np.linspace(0, 4, 1000)
+    z_vals = np.linspace(0, 5, 2001)
     r_vals = [r(z, omega_matter) for z in z_vals]
     partial_r_vals = [partialRbyOmegaMatter(omega_matter, z_vals[i]) for i in range(len(z_vals))]
 
@@ -174,7 +174,7 @@ def plotPartialRbyOmegaMatter(omega_matter):
 
 
 def getPartialRbyOmegaMatterInterp(omega_matter):
-    z_vals = np.linspace(0, 4, 1000)
+    z_vals = np.linspace(0, 5, 2001)
     r_vals = [r(z, omega_matter) for z in z_vals]
 
     partial_r_vals = [partialRbyOmegaMatter(omega_matter, z_vals[i]) for i in range(len(z_vals))]
