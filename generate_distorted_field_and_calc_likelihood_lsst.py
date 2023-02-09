@@ -30,7 +30,7 @@ sphericalBesselZeros = loadSphericalBesselZeros("zeros.csv")
 # First, generate a true fluctuation field
 
 omega_matter_true = 0.315
-radii_true = np.linspace(0, r_max_true, 1000)
+radii_true = np.linspace(0, r_max_true, 1001)
 
 
 z_true, all_grids = generateTrueField(radii_true, omega_matter_true, r_max_true, l_max, k_max)
