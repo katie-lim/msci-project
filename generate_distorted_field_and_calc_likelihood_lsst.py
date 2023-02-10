@@ -89,17 +89,17 @@ logLikelihoods = []
 
 for omega_matter in omega_matters:
 
-    W_saveFileName = "data/W_lsst_omega_m-%.3f_omega_m_0-%.3f_l_max-%d_k_max-%.2f_r_max_0-%.4f.npy" % (omega_matter, omega_matter_0, l_max, k_max, r_max_0)
-    S_saveFileName = "data/S_lsst_omega_m-%.3f_omega_m_0-%.3f_l_max-%d_k_max-%.2f_r_max_0-%.4f.npy" % (omega_matter, omega_matter_0, l_max, k_max, r_max_0)
+    W_saveFileName = "data/W_lsst_omega_m-%.4f_omega_m_0-%.4f_l_max-%d_k_max-%.2f_r_max_0-%.4f.npy" % (omega_matter, omega_matter_0, l_max, k_max, r_max_0)
+    S_saveFileName = "data/S_lsst_omega_m-%.4f_omega_m_0-%.4f_l_max-%d_k_max-%.2f_r_max_0-%.4f.npy" % (omega_matter, omega_matter_0, l_max, k_max, r_max_0)
 
     if not path.exists(W_saveFileName):
-        print("Computing W's for Ωₘ = %.3f." % omega_matter)
+        print("Computing W's for Ωₘ = %.4f." % omega_matter)
         r0OfR = getInterpolatedR0ofR(omega_matter_0, omega_matter)
         W = calc_all_W(l_max, k_max, r_max_0, phiOfR0, r0OfR)
         np.save(W_saveFileName, W)
 
     if not path.exists(S_saveFileName):
-        print("Computing S's for Ωₘ = %.3f." % omega_matter)
+        print("Computing S's for Ωₘ = %.4f." % omega_matter)
         S = calc_all_S(l_max, k_max, r_max_0, phiOfR0)
         np.save(S_saveFileName, S)
 
@@ -109,13 +109,13 @@ logLikelihoods = []
 
 for omega_matter in omega_matters:
 
-    W_saveFileName = "data/W_lsst_omega_m-%.3f_omega_m_0-%.3f_l_max-%d_k_max-%.2f_r_max_0-%.4f.npy" % (omega_matter, omega_matter_0, l_max, k_max, r_max_0)
-    S_saveFileName = "data/S_lsst_omega_m-%.3f_omega_m_0-%.3f_l_max-%d_k_max-%.2f_r_max_0-%.4f.npy" % (omega_matter, omega_matter_0, l_max, k_max, r_max_0)
+    W_saveFileName = "data/W_lsst_omega_m-%.4f_omega_m_0-%.4f_l_max-%d_k_max-%.2f_r_max_0-%.4f.npy" % (omega_matter, omega_matter_0, l_max, k_max, r_max_0)
+    S_saveFileName = "data/S_lsst_omega_m-%.4f_omega_m_0-%.4f_l_max-%d_k_max-%.2f_r_max_0-%.4f.npy" % (omega_matter, omega_matter_0, l_max, k_max, r_max_0)
 
     W = np.load(W_saveFileName)
     S = np.load(S_saveFileName)
 
-    print("Computing likelihood for Ωₘ = %.3f." % omega_matter)
+    print("Computing likelihood for Ωₘ = %.4f." % omega_matter)
     likelihood = computeLikelihood(f_lmn_0, k_min, k_max, r_max_0, W, S, nbar)
     logLikelihoods.append(likelihood)
 
