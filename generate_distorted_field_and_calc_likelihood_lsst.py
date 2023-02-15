@@ -66,7 +66,7 @@ r_max_0 = radii_fiducial[-1]
 
 # %%
 
-f_lmn_0 = calc_f_lmn_0(radii_fiducial, all_grids, l_max, k_max, n_max)
+f_lmn_0 = calc_f_lmn_0(radii_fiducial, all_observed_grids, l_max, k_max, n_max)
 
 print(f_lmn_0)
 
