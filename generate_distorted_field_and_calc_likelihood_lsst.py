@@ -53,6 +53,8 @@ phiOfR0 = calc_phi_of_r0(omega_matter_true)
 
 radii_true, all_observed_grids = multiplyFieldBySelectionFunction(radii_true, all_grids, phiOfR0)
 
+# Multiply the fractional fluctuation field by nbar, to give the number density field
+all_observed_grids = [grid * nbar for grid in all_observed_grids]
 
 # %%
 # --------------- OBSERVED
