@@ -1,8 +1,11 @@
 # %%
 import numpy as np
-from scipy.integrate import quad
+from scipy.special import spherical_jn
+from scipy.integrate import quad, simpson
+from precompute_c_ln import get_c_ln_values_without_r_max
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
 
+c_ln_values_without_r_max = get_c_ln_values_without_r_max("c_ln.csv")
 sphericalBesselZeros = loadSphericalBesselZeros("zeros.csv")
 
 
@@ -38,6 +41,76 @@ def computeIntegralSplit(integrand, N, upperLimit, epsabs=1.49e-8):
         # print(error)
 
     return answer
+
+
+
+def computeIntegralSimpson(integrand, lowerLimit, upperLimit, Npts):
+
+    x = np.linspace(lowerLimit, upperLimit, Npts)
+    y = integrand(x)
+
+    integral = simpson(y, dx=x[1] - x[0])
+
+    return integral
+
+
+
+def getZerosOfJ_lUpToBoundary(l, upperLimit):
+    n = 0
+    root = sphericalBesselZeros[l][0]
+
+    if root < upperLimit:
+        while root < upperLimit:
+            n += 1
+            root = sphericalBesselZeros[l][n]
+
+        n_max = n - 1
+
+        return sphericalBesselZeros[l][:n_max + 1]
+        
+    else:
+        return []
+
+
+def integrateWSplitByZeros(n, n_prime, l, r_max, r0OfR, rOfR0, phiOfR0, simpson=False, simpsonNpts=None):
+    k_ln = sphericalBesselZeros[l][n] / r_max
+    k_ln_prime = sphericalBesselZeros[l][n_prime] / r_max
+
+
+    def W_integrand(r):
+        r0 = r0OfR(r)
+
+        return phiOfR0(r0) * spherical_jn(l, k_ln_prime*r) * spherical_jn(l, k_ln*r0) * r*r
+
+    r_boundary = k_ln_prime * r_max
+    r0_boundary = k_ln * r0OfR(r_max)
+
+    r_zeros = getZerosOfJ_lUpToBoundary(l, r_boundary) / k_ln_prime
+    r0_zeros = getZerosOfJ_lUpToBoundary(l, r0_boundary) / k_ln
+
+    # Convert r0 values to r values
+    r0_zeros = rOfR0(r0_zeros)
+
+    # Combine and sort the zeros
+    zeros = np.sort(np.append(r_zeros, r0_zeros))
+
+    # Remove any duplicate zeros (which occur in the case r = r0)
+    zeros = np.unique(zeros)
+
+
+    integral = 0
+
+    if simpson:
+        for i in range(0, np.size(zeros) - 2):
+            integral += computeIntegralSimpson(W_integrand, zeros[i], zeros[i+1], simpsonNpts)
+    else:
+        for i in range(0, np.size(zeros) - 2):
+            integralChunk, error = quad(W_integrand, zeros[i], zeros[i+1])
+            integral += integralChunk
+
+
+    return np.power(r_max, -3/2) * c_ln_values_without_r_max[l][n_prime] * integral
+
 
 
 def plotField(grid, r_i, r_max, k_max, l_max, lmax_calc):
