@@ -3,7 +3,7 @@
 import numpy as np
 from scipy.special import spherical_jn
 
-from utils import calc_n_max_l, computeIntegralSplit
+from utils import calc_n_max_l, integrateWSplitByZeros
 from precompute_c_ln import get_c_ln_values_without_r_max
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
 from generate_f_lmn import p
@@ -63,7 +63,7 @@ def calc_S(n, n_prime, l, r_max, phiOfR0, Nsplit=10, epsabs=1.49e-8):
     return integral
 
 
-def calc_all_W(l_max, k_max, r_max, phiOfR0, r0OfR):
+def calc_all_W(l_max, k_max, r_max, phiOfR0, r0OfR, rOfR0):
     # The maximum number of modes is when l=0
     n_max_0 = calc_n_max_l(0, k_max, r_max)
 
@@ -74,25 +74,26 @@ def calc_all_W(l_max, k_max, r_max, phiOfR0, r0OfR):
 
         for n1 in range(n_max_l + 1):
             for n2 in range(n_max_l + 1):
-                W_lnn_prime[l][n1][n2] = calc_W(n1, n2, l, r_max, r0OfR, phiOfR0)
+                # W_lnn_prime[l][n1][n2] = calc_W(n1, n2, l, r_max, r0OfR, phiOfR0)
+                W_lnn_prime[l][n1][n2] = integrateWSplitByZeros(n1, n2, l, r_max, r0OfR, rOfR0, phiOfR0, simpson=True, simpsonNpts=1000)
 
     return W_lnn_prime
 
 
-def calc_all_S(l_max, k_max, r_max, phiOfR0):
-    # The maximum number of modes is when l=0
-    n_max_0 = calc_n_max_l(0, k_max, r_max)
+# def calc_all_S(l_max, k_max, r_max, phiOfR0):
+#     # The maximum number of modes is when l=0
+#     n_max_0 = calc_n_max_l(0, k_max, r_max)
 
-    S_lnn_prime = np.zeros((l_max + 1, n_max_0 + 1, n_max_0 + 1))
+#     S_lnn_prime = np.zeros((l_max + 1, n_max_0 + 1, n_max_0 + 1))
 
-    for l in range(l_max + 1):
-        n_max_l = calc_n_max_l(l, k_max, r_max)
+#     for l in range(l_max + 1):
+#         n_max_l = calc_n_max_l(l, k_max, r_max)
 
-        for n1 in range(n_max_l + 1):
-            for n2 in range(n_max_l + 1):
-                S_lnn_prime[l][n1][n2] = calc_S(n1, n2, l, r_max, phiOfR0)
+#         for n1 in range(n_max_l + 1):
+#             for n2 in range(n_max_l + 1):
+#                 S_lnn_prime[l][n1][n2] = calc_S(n1, n2, l, r_max, phiOfR0)
 
-    return S_lnn_prime
+#     return S_lnn_prime
 
 
 
