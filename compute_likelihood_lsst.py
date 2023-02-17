@@ -125,7 +125,8 @@ def computeExpectation(l, m, n, l_prime, m_prime, n_prime, k_max, r_max, P, W, S
 
 
     # Shot noise term
-    shot_noise_term = nbar * c_ln * c_l_prime_n_prime * S[l][n][n_prime]
+    shot_noise_term = 0 # Ignore shot noise for now
+    # shot_noise_term = nbar * c_ln * c_l_prime_n_prime * S[l][n][n_prime]
 
 
     return signal_term + shot_noise_term
