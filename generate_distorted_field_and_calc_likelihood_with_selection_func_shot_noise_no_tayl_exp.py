@@ -136,12 +136,12 @@ plt.show()
 
 # Estimate the width, sigma
 
-def quadratic(x, sigma):
-    return -1/2 * ((x - omega_m_peak)/sigma)**2
+def quadratic(x, mean, sigma):
+    return -1/2 * ((x - mean)/sigma)**2
 
 
-params, cov = curve_fit(quadratic, omega_matters, delta_lnL, [1])
-sigma = np.abs(params[0])
+params, cov = curve_fit(quadratic, omega_matters, delta_lnL, [omega_m_peak, 1])
+sigma = np.abs(params[1])
 
 print("σ = %.5f" % sigma)
 
@@ -160,5 +160,5 @@ plt.legend(loc="lower left")
 plt.show()
 
 
-print("Result: Ωₘ = %.5f +/- %.5f" % (omega_m_peak, sigma))
+print("Result: Ωₘ = %.5f +/- %.5f" % (params[0], sigma))
 # %%
