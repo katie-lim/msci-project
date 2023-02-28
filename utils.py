@@ -1,5 +1,6 @@
 # %%
 import numpy as np
+import matplotlib.pyplot as plt
 from scipy.special import spherical_jn
 from scipy.integrate import quad, simpson
 from precompute_c_ln import get_c_ln_values_without_r_max
@@ -123,7 +124,7 @@ def integrateWSplitByZeros(n, n_prime, l, r_max, r0OfR, rOfR0, phiOfR0, simpson=
             integral += integralChunk
 
 
-    return np.power(r_max, -3/2) * c_ln_values_without_r_max[l][n_prime] * integral
+    return np.power(r_max, -3) * c_ln_values_without_r_max[l][n] * c_ln_values_without_r_max[l][n_prime] * integral
 
 
 
