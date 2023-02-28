@@ -69,13 +69,14 @@ likelihoods = []
 
 for omega_matter in omega_matters:
 
-    W_saveFileName = "W_no_tayl_exp_omega_m-%.3f_omega_m_0-%.3f_l_max-%d_k_max-%.2f_r_max_0-%.4f_R-%.3f.npy" % (omega_matter, omega_matter_0, l_max, k_max, r_max_0, R)
+    W_saveFileName = "W_no_tayl_exp_zeros_omega_m-%.5f_omega_m_0-%.5f_l_max-%d_k_max-%.2f_r_max_0-%.4f_R-%.3f.npy" % (omega_matter, omega_matter_0, l_max, k_max, r_max_0, R)
 
     if path.exists(W_saveFileName):
         W = np.load(W_saveFileName)
     else:
         r0OfR = getInterpolatedR0ofR(omega_matter_0, omega_matter)
-        W = calc_all_W(l_max, k_max, r_max_0, R, r0OfR)
+        rOfR0 = getInterpolatedR0ofR(omega_matter, omega_matter_0)
+        W = calc_all_W(l_max, k_max, r_max_0, R, r0OfR, rOfR0)
         np.save(W_saveFileName, W)
 
     # likelihood = computeLikelihood(f_lmn_0, k_min, k_max, r_max_0, omega_m, omega_matter_0, W, nbar)
