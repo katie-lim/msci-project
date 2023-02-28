@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.special import spherical_jn
 
-from utils import calc_n_max_l, computeIntegralSplit
+from utils import calc_n_max_l, computeIntegralSplit, integrateWSplitByZeros, gaussianPhi
 from precompute_c_ln import get_c_ln_values_without_r_max
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
 from generate_f_lmn import p
@@ -31,18 +31,24 @@ def calc_W(n, n_prime, l, r_max, R, r0OfR, Nsplit=10, epsabs=1.49e-8):
     return np.power(r_max, -3) * c_ln_values_without_r_max[l][n] * c_ln_values_without_r_max[l][n_prime] * integral
 
 
-def calc_all_W(l_max, k_max, r_max, R, r0OfR):
+def calc_all_W(l_max, k_max, r_max, R, r0OfR, rOfR0):
     # The maximum number of modes is when l=0
     n_max_0 = calc_n_max_l(0, k_max, r_max)
 
     W_lnn_prime = np.zeros((l_max + 1, n_max_0 + 1, n_max_0 + 1))
+
+
+    def phi(r0):
+        return gaussianPhi(r0, R)
+
 
     for l in range(l_max + 1):
         n_max_l = calc_n_max_l(l, k_max, r_max)
 
         for n1 in range(n_max_l + 1):
             for n2 in range(n_max_l + 1):
-                W_lnn_prime[l][n1][n2] = calc_W(n1, n2, l, r_max, R, r0OfR)
+                # W_lnn_prime[l][n1][n2] = calc_W(n1, n2, l, r_max, R, r0OfR)
+                W_lnn_prime[l][n1][n2] = integrateWSplitByZeros(n1, n2, l, r_max, r0OfR, rOfR0, phi, simpson=True, simpsonNpts=1000)
 
     return W_lnn_prime
 
@@ -76,7 +82,7 @@ def computeExpectation(l, m, n, l_prime, m_prime, n_prime, k_max, r_max, P, W, n
     return answer
 
 
-def computeLikelihood(f_lmn, k_min, k_max, r_max, omega_matter, omega_matter_0, W, nbar):
+def computeLikelihood(f_lmn, k_min, k_max, r_max, omega_matter, W, nbar):
     shape = f_lmn.shape
     l_max = shape[0] - 1 # -1 to account for l=0
 
@@ -102,7 +108,7 @@ def computeLikelihood(f_lmn, k_min, k_max, r_max, omega_matter, omega_matter_0, 
         for n1 in range(n_min_l, n_max_l + 1):
             for n2 in range(n_min_l, n_max_l + 1):
 
-                sigma_l[n1 - n_min_l][n2 - n_min_l] = computeExpectation(l, 0, n1, l, 0, n2, k_max, r_max, omega_matter, omega_matter_0, p, W, nbar)
+                sigma_l[n1 - n_min_l][n2 - n_min_l] = computeExpectation(l, 0, n1, l, 0, n2, k_max, r_max, p, W, nbar)
                 # Set l = l' and m = m' = 0 since the expectation does not vary with m
 
 
