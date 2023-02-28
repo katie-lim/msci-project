@@ -66,11 +66,11 @@ def computeExpectation(l, m, n, l_prime, m_prime, n_prime, k_max, r_max, P, W, n
             answer += W_n_nprimeprime * np.conj(W_nprime_nprimeprime) * P(k_ln_prime_prime)
 
 
-        answer *= nbar*nbar
+        # answer *= nbar*nbar
 
 
     # Shot noise term
-    answer += nbar * W[l][n][n_prime]
+    # answer += nbar * W[l][n][n_prime]
 
 
     return answer
