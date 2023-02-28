@@ -12,7 +12,7 @@ from distance_redshift_relation import *
 
 
 l_max = 15
-k_min = 100
+k_min = 0
 k_max = 200
 r_max_true = 0.75
 n_max = calc_n_max_l(0, k_max, r_max_true) # There are the most modes when l=0
@@ -27,8 +27,8 @@ sphericalBesselZeros = loadSphericalBesselZeros("zeros.csv")
 
 # First, generate a true field
 
-omega_matter_true = 0.5
-radii_true = np.linspace(0, r_max_true, 1000)
+omega_matter_true = 0.315
+radii_true = np.linspace(0, r_max_true, 1001)
 
 true_z_of_r = getInterpolatedZofR(omega_matter_true)
 z_true = true_z_of_r(radii_true)
@@ -37,7 +37,7 @@ z_true = true_z_of_r(radii_true)
 
 # --------------- OBSERVED
 
-omega_matter_0 = 0.5
+omega_matter_0 = 0.315
 
 r_of_z_fiducial = getInterpolatedRofZ(omega_matter_0)
 radii_fiducial = r_of_z_fiducial(z_true)
@@ -46,10 +46,10 @@ r_max_0 = radii_fiducial[-1]
 # %%
 
 # Or, load f_lmn_0 from a file
-omega_matter_true = 0.5
-omega_matter_0 = 0.5
+omega_matter_true = 0.315
+omega_matter_0 = 0.315
 l_max = 15
-k_max = 300
+k_max = 200
 r_max_true = 0.75
 R = 0.25
 
