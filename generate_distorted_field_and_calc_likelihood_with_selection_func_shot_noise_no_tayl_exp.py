@@ -74,6 +74,7 @@ for omega_matter in omega_matters:
     if path.exists(W_saveFileName):
         W = np.load(W_saveFileName)
     else:
+        print("Computing W's for Ωₘ = %.3f." % omega_matter)
         r0OfR = getInterpolatedR0ofR(omega_matter_0, omega_matter)
         rOfR0 = getInterpolatedR0ofR(omega_matter, omega_matter_0)
         W = calc_all_W(l_max, k_max, r_max_0, R, r0OfR, rOfR0)
