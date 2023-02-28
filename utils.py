@@ -72,7 +72,7 @@ def getZerosOfJ_lUpToBoundary(l, upperLimit):
         return []
 
 
-def integrateWSplitByZeros(n, n_prime, l, r_max, r0OfR, rOfR0, phiOfR0, simpson=False, simpsonNpts=None):
+def integrateWSplitByZeros(n, n_prime, l, r_max, r0OfR, rOfR0, phiOfR0, simpson=False, simpsonNpts=None, plot=False):
     k_ln = sphericalBesselZeros[l][n] / r_max
     k_ln_prime = sphericalBesselZeros[l][n_prime] / r_max
 
@@ -98,13 +98,27 @@ def integrateWSplitByZeros(n, n_prime, l, r_max, r0OfR, rOfR0, phiOfR0, simpson=
     zeros = np.unique(zeros)
 
 
+    zeros = np.append(zeros, [r_max])
+    zeros = np.insert(zeros, 0, 0)
+
+
+    if plot:
+        x = np.linspace(0, r_max, 2000)
+        y = W_integrand(x)
+
+        plt.figure(dpi=200)
+        plt.plot(x, y)
+        plt.vlines(zeros, np.min(y), np.max(y), "r", "dotted")
+        plt.show()
+
+
     integral = 0
 
     if simpson:
-        for i in range(0, np.size(zeros) - 2):
+        for i in range(0, np.size(zeros) - 1):
             integral += computeIntegralSimpson(W_integrand, zeros[i], zeros[i+1], simpsonNpts)
     else:
-        for i in range(0, np.size(zeros) - 2):
+        for i in range(0, np.size(zeros) - 1):
             integralChunk, error = quad(W_integrand, zeros[i], zeros[i+1])
             integral += integralChunk
 
