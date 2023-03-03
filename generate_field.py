@@ -81,17 +81,17 @@ def generateTrueField(radii_true, omega_matter_true, r_max_true, l_max, k_max):
     return (z_true, all_grids)
 
 
-def multiplyFieldBySelectionFunction(radii_true, all_grids, phiOfR):
+def multiplyFieldBySelectionFunc(radii_fiducial, all_grids, phiOfR0):
     """
     Multiply a field by the provided selection function, to produce the observed field.
     """
 
     all_observed_grids = []
 
-    for i in range(len(radii_true)):
+    for i in range(len(radii_fiducial)):
         grid = all_grids[i]
 
-        all_observed_grids.append(grid * float(phiOfR(radii_true[i])))
+        all_observed_grids.append(grid * float(phiOfR0(radii_fiducial[i])))
 
 
-    return (radii_true, all_observed_grids)
+    return (radii_fiducial, all_observed_grids)
