@@ -202,7 +202,6 @@ plt.plot(omega_matters, quadratic(omega_matters, *params), label="Gaussian fit")
 plt.xlabel("$\Omega_m$")
 plt.ylabel("$\Delta$ ln L")
 plt.title("$\Delta$ ln L($\Omega_m$)\n$\Omega_m^{true}$=%.3f\n$\Omega_m^{fiducial}}$=%.3f\n$l_{max}$=%d, $k_{min}$=%.1f, $k_{max}$=%.1f, $r_{max}^0$=%.2f ($z_{max}$=%.2f), $\phi$ $r_{max}$=%.3f, $n_{max,0}$=%d" % (omega_matter_true, omega_matter_0, l_max, k_min, k_max, r_max_0, z_max, phi_r_max, n_max))
-plt.title("$\Delta$ ln L($\Omega_m$)")
 plt.show()
 
 
