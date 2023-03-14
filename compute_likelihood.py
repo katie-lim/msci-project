@@ -37,10 +37,13 @@ def computeExpectation(l, m, n, l_prime, m_prime, n_prime, k_max, r_max_0, P, W)
 def computeLikelihood(f_lmn_0, k_min, k_max, r_max_0, W):
     shape = f_lmn_0.shape
     l_max = shape[0] - 1 # -1 to account for l=0
+    ln_2pi = np.log(2 * np.pi)
 
     total = 0
 
 
+    # Loop through all blocks of the covariance matrix -- (l, m, Re/Im)
+    
     for l in range(l_max + 1):
         # print("l =", l)
         n_max_l = calc_n_max_l(l, k_max, r_max_0)
@@ -93,6 +96,7 @@ def computeLikelihood(f_lmn_0, k_min, k_max, r_max_0, W):
             print("det Σ_%d = %.3e" % (l, det_sigma_l))
 
 
+        # Continue looping through all blocks of the covariance matrix -- (l, m, Re/Im)
 
         for m in range(l + 1):
             # Ignore the monopole l = m = 0
@@ -148,15 +152,12 @@ def computeLikelihood(f_lmn_0, k_min, k_max, r_max_0, W):
                     total += np.log(det_sigma_l_half)
 
 
-    # print("Determinant:", determinant)
-    # print("Total:", total)
-    # print("Log determinant:", np.log(determinant))
+                # Add contribution from factors of ln(2pi) for this block
+                N = np.size(data_block)
+                total += N * ln_2pi
 
 
-    # lnL = -1/2 * np.log(2*np.pi*determinant) - (1/2) * total
-    lnL = -1/2 * (np.log(2*np.pi) + total)
-
-    # print("ln L:", lnL)
+    lnL = -1/2 * total
 
     return lnL
 
