@@ -26,9 +26,9 @@ def generate_f_lmn(l_max, r_max, k_max):
                 k_ln = sphericalBesselZeros[l][n] / r_max
 
                 if m == 0:
-                    f_lmn_values[l][m][n] = np.random.normal(0, p(k_ln))
+                    f_lmn_values[l][m][n] = np.random.normal(0, np.sqrt(p(k_ln)))
                 else:
-                    f_lmn_values[l][m][n] = np.random.normal(0, p(k_ln)/2) + np.random.normal(0, p(k_ln)/2) * 1j
+                    f_lmn_values[l][m][n] = np.random.normal(0, np.sqrt(p(k_ln)/2)) + np.random.normal(0, np.sqrt(p(k_ln)/2)) * 1j
 
 
     return f_lmn_values
