@@ -39,8 +39,8 @@ W_taylor_expansions = []
 
 
 for omega_matter in omega_matters:
-    W_quad_saveFileName = "W_no_tayl_exp_quad_omega_m-%.5f_omega_m_0-%.5f_l_max-%d_k_max-%.2f_r_max_0-%.4f_R-%.3f.npy" % (omega_matter, omega_matter_0, l_max, k_max, r_max_0, R)
-    W_zeros_saveFileName = "W_no_tayl_exp_zeros_omega_m-%.5f_omega_m_0-%.5f_l_max-%d_k_max-%.2f_r_max_0-%.4f_R-%.3f.npy" % (omega_matter, omega_matter_0, l_max, k_max, r_max_0, R)
+    W_quad_saveFileName = "data/W_no_tayl_exp_quad_omega_m-%.5f_omega_m_0-%.5f_l_max-%d_k_max-%.2f_r_max_0-%.4f_R-%.3f.npy" % (omega_matter, omega_matter_0, l_max, k_max, r_max_0, R)
+    W_zeros_saveFileName = "data/W_no_tayl_exp_zeros_omega_m-%.5f_omega_m_0-%.5f_l_max-%d_k_max-%.2f_r_max_0-%.4f_R-%.3f.npy" % (omega_matter, omega_matter_0, l_max, k_max, r_max_0, R)
 
     # Full integral, using quad and splitting into 10 chunks
     W_full_int_quad = np.load(W_quad_saveFileName)[l][n][n_prime]

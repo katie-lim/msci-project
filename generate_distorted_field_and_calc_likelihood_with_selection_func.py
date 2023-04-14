@@ -65,16 +65,24 @@ r_max_0 = radii_fiducial[-1]
 
 # %%
 
+P_amp = 1
+
 f_lmn_0 = calc_f_lmn_0(radii_fiducial, all_observed_grids, l_max, k_max, n_max)
 
-print(f_lmn_0)
+# print(f_lmn_0)
 
-# %%
 
-saveFileName = "data/f_lmn_0_true-%.3f_fiducial-%.3f_l_max-%d_k_max-%.2f_r_max_true-%.3f_R-%.3f_with_phi" % (omega_matter_true, omega_matter_0, l_max, k_max, r_max_true, R)
+
+saveFileName = "data/f_lmn_0_true-%.3f_fiducial-%.3f_l_max-%d_k_max-%.2f_r_max_true-%.3f_R-%.3f_P-amp_%.2f" % (omega_matter_true, omega_matter_0, l_max, k_max, r_max_true, R, P_amp)
 
 np.save(saveFileName, f_lmn_0)
 print("Done! File saved to %s" % saveFileName)
+
+# %%
+
+# number of modes?
+print("Number of n_lmn modes =", np.count_nonzero(f_lmn_0))
+
 
 # %%
 
@@ -84,9 +92,10 @@ omega_matter_0 = 0.315
 l_max = 15
 k_max = 200
 r_max_true = 0.75
-R = 0.25    
+R = 0.25
+P_amp = 1
 
-saveFileName = "data/f_lmn_0_true-%.3f_fiducial-%.3f_l_max-%d_k_max-%.2f_r_max_true-%.3f_R-%.3f_with_phi.npy" % (omega_matter_true, omega_matter_0, l_max, k_max, r_max_true, R)
+saveFileName = "data/f_lmn_0_true-%.3f_fiducial-%.3f_l_max-%d_k_max-%.2f_r_max_true-%.3f_R-%.3f_P-amp_%.2f.npy" % (omega_matter_true, omega_matter_0, l_max, k_max, r_max_true, R, P_amp)
 
 f_lmn_0 = np.load(saveFileName)
 

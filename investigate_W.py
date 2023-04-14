@@ -39,9 +39,11 @@ r_max_0 = radii_fiducial[-1]
 # Investigate the form of W_nn'^l
 
 # n, n_prime, l = 60, 59, 15
-n, n_prime, l = 20, 10, 5
+# n, n_prime, l = 20, 10, 5
+n, n_prime, l = 40, 30, 10
+# n, n_prime, l = 39, 40, 15
 
-omega_matters = np.linspace(omega_matter_0 - 0.02, omega_matter_0 + 0.02, 11)
+omega_matters = np.linspace(omega_matter_0 - 0.02, omega_matter_0 + 0.02, 51)
 W_vals_full_zeros = []
 W_vals_full = []
 W_vals_tayl = []
@@ -81,13 +83,19 @@ for omega_matter in omega_matters:
 # %%
 # Compare the two methods
 
-plt.figure(dpi=200)
-plt.plot(omega_matters, W_vals_full, label="Full integral (split into 10 chunks)")
-plt.plot(omega_matters, W_vals_full_zeros, label="Full integral (split by zeros)")
+plt.figure(dpi=400)
+# plt.plot(omega_matters, W_vals_full, label="Full integral (split into 10 chunks)")
+# plt.plot(omega_matters, W_vals_full_zeros, label="Full integral (split by zeros)")
+plt.plot(omega_matters, W_vals_full_zeros, label="Full integral")
 plt.plot(omega_matters, W_vals_tayl, label="Taylor expansion")
+
 plt.xlabel("$\Omega_m$")
 plt.title("$W_{%d,%d}^{%d}$" % (n, n_prime, l))
 plt.legend()
+plt.savefig("W_%d_%d_%d.png" % (n, n_prime, l), bbox_inches = "tight")
 plt.show()
 
+# %%
+import matplotlib.pyplot as plt
+plt.rcParams.update({'font.size': 16})
 # %%

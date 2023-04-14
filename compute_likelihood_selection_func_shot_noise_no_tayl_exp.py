@@ -82,13 +82,11 @@ def computeExpectation(l, m, n, l_prime, m_prime, n_prime, k_max, r_max, P, W, n
     return answer
 
 
-def computeLikelihood(f_lmn, k_min, k_max, r_max, omega_matter, W, nbar):
+def computeLikelihood(f_lmn, k_min, k_max, r_max, W, P, nbar):
     shape = f_lmn.shape
     l_max = shape[0] - 1 # -1 to account for l=0
 
     total = 0
-
-    print("Computing likelihood for Ωₘ = %.3f" % omega_matter)
 
 
     for l in range(l_max + 1):
@@ -108,7 +106,7 @@ def computeLikelihood(f_lmn, k_min, k_max, r_max, omega_matter, W, nbar):
         for n1 in range(n_min_l, n_max_l + 1):
             for n2 in range(n_min_l, n_max_l + 1):
 
-                sigma_l[n1 - n_min_l][n2 - n_min_l] = computeExpectation(l, 0, n1, l, 0, n2, k_max, r_max, p, W, nbar)
+                sigma_l[n1 - n_min_l][n2 - n_min_l] = computeExpectation(l, 0, n1, l, 0, n2, k_max, r_max, P, W, nbar)
                 # Set l = l' and m = m' = 0 since the expectation does not vary with m
 
 
