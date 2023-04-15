@@ -1,13 +1,11 @@
 # %%
 
 import numpy as np
-import matplotlib.pyplot as plt
-from scipy.special import spherical_jn
 
-from utils import calc_n_max_l, computeIntegralSplit, integrateWSplitByZeros
+from utils import calc_n_max_l
 from precompute_c_ln import get_c_ln_values_without_r_max
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
-from generate_f_lmn import p
+# from generate_f_lmn import p
 
 
 c_ln_values_without_r_max = get_c_ln_values_without_r_max("c_ln.csv")
