@@ -17,7 +17,7 @@ def plotContour(omega_matters, P_amps, likelihoods, title=""):
     delta_lnLs = getDeltaLnL(likelihoods)
     Z = np.transpose(delta_lnLs)
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(dpi=500)
     CS = ax.contour(X, Y, Z)
     ax.clabel(CS, inline=True, fontsize=10)
     ax.set_title('$\\Delta \\ln L$\n' + title)
