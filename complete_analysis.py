@@ -40,33 +40,6 @@ z_true, all_grids = generateTrueField(radii_true, omega_matter_true, r_max_true,
 
 # %%
 
-import pyshtools as pysh
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-
-from cartopy import crs as ccrs
-
-# %%
-
-mpl.rcParams.update({"axes.grid" : True, "grid.color": "#333333"})
-
-i = 500
-# title = r"$\delta(\mathbf{r})$ at $r$=%.2f\n$r_{max}$=%.2f, $k_{max}$=%d, $l_{max}$=%d" % (radii_true[i], r_max_true, k_max, l_max)
-title = r"$\delta(\mathbf{r})$ at $r$=%.2f" % radii_true[i] + "\n" + "$r_{max}$=%.2f, $k_{max}$=%d, $l_{max}$=%d" % (r_max_true, k_max, l_max)
-
-fig, ax = all_grids[i].plot(
-    projection=ccrs.Mollweide(),
-    colorbar='right',
-    cb_label=r'$\delta(r, \theta, \phi)$',
-    title=title,
-    grid=True,
-    show=False)
-plt.savefig("field.svg", transparent=True, dpi=300)
-plt.show()
-
-
-# %%
-
 # Add the effect of the selection function
 
 radii_true, all_observed_grids = multiplyFieldBySelectionFunction(radii_true, all_grids, phi)

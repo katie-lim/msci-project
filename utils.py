@@ -6,6 +6,10 @@ from scipy.integrate import quad, simpson
 from precompute_c_ln import get_c_ln_values_without_r_max
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
 
+import matplotlib as mpl
+from cartopy import crs as ccrs
+
+
 c_ln_values_without_r_max = get_c_ln_values_without_r_max("c_ln.csv")
 sphericalBesselZeros = loadSphericalBesselZeros("zeros.csv")
 
@@ -127,8 +131,9 @@ def integrateWSplitByZeros(n, n_prime, l, r_max, r0OfR, rOfR0, phiOfR0, simpson=
     return np.power(r_max, -3) * c_ln_values_without_r_max[l][n] * c_ln_values_without_r_max[l][n_prime] * integral
 
 
+# Plotting fields
 
-def plotField(grid, r_i, r_max, k_max, l_max, lmax_calc):
+def plotFieldOld(grid, r_i, r_max, k_max, l_max, lmax_calc):
 
     title = "r_i = %.2f, r_max = %.2f, k_max = %.2f, l_max = %d, lmax_calc = %d" % (r_i, r_max, k_max, l_max, lmax_calc)
 
@@ -136,3 +141,23 @@ def plotField(grid, r_i, r_max, k_max, l_max, lmax_calc):
 
     fig = grid.plotgmt(projection='mollweide', colorbar='right', title=title)
     fig.show()
+
+
+def plotField(grid, title="", colorbarLabel=r'$\delta(r, \theta, \phi)$', saveFileName=None):
+    mpl.rcParams.update({"axes.grid" : True, "grid.color": "#333333"})
+
+    # i = 500
+    # title = r"$\delta(\mathbf{r})$ at $r$=%.2f" % radii_true[i] + "\n" + "$r_{max}$=%.2f, $k_{max}$=%d, $l_{max}$=%d" % (r_max_true, k_max, l_max)
+
+    fig, ax = grid.plot(
+        projection=ccrs.Mollweide(),
+        colorbar='right',
+        cb_label=colorbarLabel,
+        title=title,
+        grid=True,
+        show=False)
+    
+    if saveFileName:
+        plt.savefig("field.svg", transparent=True, dpi=300)
+
+    plt.show()
