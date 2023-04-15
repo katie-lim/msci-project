@@ -64,7 +64,6 @@ fig, ax = all_grids[i].plot(
 plt.savefig("field.svg", transparent=True, dpi=300)
 plt.show()
 
-# r_max_true, k_max, l_max,
 
 # %%
 
@@ -108,7 +107,7 @@ f_lmn_0 = np.load(saveFileName)
 
 omega_matters = np.linspace(omega_matter_0 - 0.005, omega_matter_0 + 0.005, 11)
 # P_amps = [1]
-P_amps = np.linspace(0.95, 1.05, 11)
+P_amps = np.linspace(0.95, 1.05, 5)
 # omega_matters = np.array([0.315])
 # likelihoods = []
 
@@ -178,13 +177,12 @@ delta_lnLs = likelihoods - maximum
 
 
 import numpy as np
-import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 
 
-delta = 0.025
-x = np.arange(-3.0, 3.0, delta)
-y = np.arange(-2.0, 2.0, delta)
+# delta = 0.025
+# x = np.arange(-3.0, 3.0, delta)
+# y = np.arange(-2.0, 2.0, delta)
 
 # X, Y = np.meshgrid(x, y)
 
@@ -193,7 +191,7 @@ y = np.arange(-2.0, 2.0, delta)
 # Z = (Z1 - Z2) * 2
 
 X, Y = np.meshgrid(omega_matters, P_amps)
-Z = delta_lnLs
+Z = np.transpose(delta_lnLs)
 
 fig, ax = plt.subplots()
 CS = ax.contour(X, Y, Z)
@@ -341,36 +339,4 @@ plt.show()
 print("Result: Ωₘ = %.5f +/- %.5f" % (params[0], sigma))
 # %%
 
-# %%
-from matplotlib import font_manager
-sorted(font_manager.get_font_names())
-# %%
-# %%
-np.save("x.npy", omega_matters)
-# %%
-
-np.save("y.npy", likelihoods)
-# %%
-omega_matters = np.load("x.npy")
-likelihoods = np.load("y.npy")
-
-# %%
-
-import matplotlib.pyplot as plt
-from matplotlib import font_manager
-
-font_path = 'arial.ttf'  # Your font path goes here
-font_manager.fontManager.addfont(font_path)
-prop = font_manager.FontProperties(fname=font_path)
-
-plt.rcParams['font.family'] = 'sans-serif'
-plt.rcParams['font.sans-serif'] = prop.get_name()
-plt.rcParams.update({'font.size': 16})
-
-# %%
-plt.plot([1, 2, 3], [1, 2, 3])
-# %%
-
-omega_matters = omega_matters[:-1]
-likelihoods = likelihoods[:-1]
 # %%
