@@ -41,10 +41,10 @@ z_true, all_grids = generateTrueField(radii_true, omega_matter_true, r_max_true,
 
 # Add the effect of the selection function
 
-def phi(r0):
+def phiOfR0(r0):
     return gaussianPhi(r0, R)
 
-radii_true, all_observed_grids = multiplyFieldBySelectionFunction(radii_true, all_grids, phi)
+radii_true, all_observed_grids = multiplyFieldBySelectionFunction(radii_true, all_grids, phiOfR0)
 
 # %%
 
@@ -102,7 +102,7 @@ for omega_matter in omega_matters:
         print("Computing W's for Ωₘ = %.3f." % omega_matter)
         r0OfR = getInterpolatedR0ofR(omega_matter_0, omega_matter)
         rOfR0 = getInterpolatedR0ofR(omega_matter, omega_matter_0)
-        W = calc_all_W(l_max, k_max, r_max_0, R, r0OfR, rOfR0)
+        W = calc_all_W(l_max, k_max, r_max_0, R, r0OfR, rOfR0, phiOfR0)
         np.save(W_saveFileName, W)
 
 # %%
