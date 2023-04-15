@@ -7,7 +7,7 @@ from generate_field import generateTrueField, multiplyFieldBySelectionFunction
 from utils import calc_n_max_l
 from precompute_c_ln import get_c_ln_values_without_r_max
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
-from compute_likelihood_selection_func_shot_noise_no_tayl_exp import calc_all_W, computeLikelihood
+from compute_likelihood import calc_all_W, computeLikelihood
 
 from distance_redshift_relation import *
 
