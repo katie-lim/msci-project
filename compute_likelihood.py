@@ -15,41 +15,6 @@ sphericalBesselZeros = loadSphericalBesselZeros("zeros.csv")
 
 
 
-def calc_W(n, n_prime, l, r_max, R, r0OfR, Nsplit=10, epsabs=1.49e-8):
-    k_ln = sphericalBesselZeros[l][n] / r_max
-    k_ln_prime = sphericalBesselZeros[l][n_prime] / r_max
-
-
-    def W_integrand(r):
-        r0 = r0OfR(r)
-
-        return r*r * np.exp(-r0*r0/(2*R*R)) * spherical_jn(l, k_ln_prime*r) * spherical_jn(l, k_ln*r0)
-
-
-    integral = computeIntegralSplit(W_integrand, Nsplit, r_max, epsabs)
-
-    return np.power(r_max, -3) * c_ln_values_without_r_max[l][n] * c_ln_values_without_r_max[l][n_prime] * integral
-
-
-def calc_all_W(l_max, k_max, r_max, R, r0OfR, rOfR0, phiOfR0):
-    # The maximum number of modes is when l=0
-    n_max_0 = calc_n_max_l(0, k_max, r_max)
-
-    W_lnn_prime = np.zeros((l_max + 1, n_max_0 + 1, n_max_0 + 1))
-
-
-    for l in range(l_max + 1):
-        n_max_l = calc_n_max_l(l, k_max, r_max)
-
-        for n1 in range(n_max_l + 1):
-            for n2 in range(n_max_l + 1):
-                # W_lnn_prime[l][n1][n2] = calc_W(n1, n2, l, r_max, R, r0OfR)
-                W_lnn_prime[l][n1][n2] = integrateWSplitByZeros(n1, n2, l, r_max, r0OfR, rOfR0, phiOfR0, simpson=True, simpsonNpts=1000)
-
-    return W_lnn_prime
-
-
-
 def computeExpectation(l, m, n, l_prime, m_prime, n_prime, k_max, r_max, P, W, nbar):
 
     answer = 0

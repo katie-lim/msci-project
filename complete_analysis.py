@@ -5,7 +5,8 @@ from os import path
 from generate_field import generateTrueField, multiplyFieldBySelectionFunction
 from distance_redshift_relation import *
 from spherical_bessel_transform import calc_f_lmn_0
-from compute_likelihood import calc_all_W, computeLikelihood
+from calculate_W import calc_all_W
+from compute_likelihood import computeLikelihood
 from analyse_likelihood import plotContour
 from utils import calc_n_max_l, gaussianPhi
 from precompute_c_ln import get_c_ln_values_without_r_max
@@ -109,7 +110,7 @@ for omega_matter in omega_matters:
         print("Computing W's for Ωₘ = %.3f." % omega_matter)
         r0OfR = getInterpolatedR0ofR(omega_matter_0, omega_matter)
         rOfR0 = getInterpolatedR0ofR(omega_matter, omega_matter_0)
-        W = calc_all_W(l_max, k_max, r_max_0, R, r0OfR, rOfR0, phiOfR0)
+        W = calc_all_W(l_max, k_max, r_max_0, r0OfR, rOfR0, phiOfR0)
         np.save(W_saveFileName, W)
 
 # %%

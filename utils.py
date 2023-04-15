@@ -1,7 +1,6 @@
 # %%
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.special import spherical_jn
 from scipy.integrate import quad, simpson
 from precompute_c_ln import get_c_ln_values_without_r_max
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
@@ -61,6 +60,8 @@ def computeIntegralSimpson(integrand, lowerLimit, upperLimit, Npts):
 
 
 def getZerosOfJ_lUpToBoundary(l, upperLimit):
+    # Used to compute integrals for W and SN
+    # by splitting them into chunks based on zeros of integrand
     n = 0
     root = sphericalBesselZeros[l][0]
 
@@ -76,59 +77,6 @@ def getZerosOfJ_lUpToBoundary(l, upperLimit):
     else:
         return []
 
-
-def integrateWSplitByZeros(n, n_prime, l, r_max, r0OfR, rOfR0, phiOfR0, simpson=False, simpsonNpts=None, plot=False):
-    k_ln = sphericalBesselZeros[l][n] / r_max
-    k_ln_prime = sphericalBesselZeros[l][n_prime] / r_max
-
-
-    def W_integrand(r):
-        r0 = r0OfR(r)
-
-        return phiOfR0(r0) * spherical_jn(l, k_ln_prime*r) * spherical_jn(l, k_ln*r0) * r*r
-
-    r_boundary = k_ln_prime * r_max
-    r0_boundary = k_ln * r0OfR(r_max)
-
-    r_zeros = getZerosOfJ_lUpToBoundary(l, r_boundary) / k_ln_prime
-    r0_zeros = getZerosOfJ_lUpToBoundary(l, r0_boundary) / k_ln
-
-    # Convert r0 values to r values
-    r0_zeros = rOfR0(r0_zeros)
-
-    # Combine and sort the zeros
-    zeros = np.sort(np.append(r_zeros, r0_zeros))
-
-    # Remove any duplicate zeros (which occur in the case r = r0)
-    zeros = np.unique(zeros)
-
-
-    zeros = np.append(zeros, [r_max])
-    zeros = np.insert(zeros, 0, 0)
-
-
-    if plot:
-        x = np.linspace(0, r_max, 2000)
-        y = W_integrand(x)
-
-        plt.figure(dpi=200)
-        plt.plot(x, y)
-        plt.vlines(zeros, np.min(y), np.max(y), "r", "dotted")
-        plt.show()
-
-
-    integral = 0
-
-    if simpson:
-        for i in range(0, np.size(zeros) - 1):
-            integral += computeIntegralSimpson(W_integrand, zeros[i], zeros[i+1], simpsonNpts)
-    else:
-        for i in range(0, np.size(zeros) - 1):
-            integralChunk, error = quad(W_integrand, zeros[i], zeros[i+1])
-            integral += integralChunk
-
-
-    return np.power(r_max, -3) * c_ln_values_without_r_max[l][n] * c_ln_values_without_r_max[l][n_prime] * integral
 
 
 # Plotting fields
