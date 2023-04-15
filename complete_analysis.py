@@ -106,20 +106,6 @@ for omega_matter in omega_matters:
         W = calc_all_W(l_max, k_max, r_max_0, R, r0OfR, rOfR0)
         np.save(W_saveFileName, W)
 
-#%%
-
-# for omega_matter in omega_matters:
-
-#     W_saveFileName = "data/W_no_tayl_exp_zeros_omega_m-%.5f_omega_m_0-%.5f_l_max-%d_k_max-%.2f_r_max_0-%.4f_R-%.3f.npy" % (omega_matter, omega_matter_0, l_max, k_max, r_max_0, R)
-#     # W_saveFileName = "data/W_no_tayl_exp_zeros_omega_m-%.5f_omega_m_0-%.5f_l_max-%d_k_max-%.2f_r_max_0-%.4f_R-%.3f.npy" % (omega_matter, omega_matter_0, l_max, k_max, r_max_0, R)
-#     W = np.load(W_saveFileName)
-
-#     likelihood = computeLikelihood(f_lmn_0, k_min, k_max, r_max_0, omega_matter, W, nbar=1)
-#     likelihoods.append(likelihood)
-
-# # Convert from complex numbers to floats
-# likelihoods = np.real(likelihoods)
-
 # %%
 
 for i, omega_matter in enumerate(omega_matters):
@@ -153,20 +139,7 @@ delta_lnLs = likelihoods - maximum
 
 # %%
 
-
-import numpy as np
 import matplotlib.pyplot as plt
-
-
-# delta = 0.025
-# x = np.arange(-3.0, 3.0, delta)
-# y = np.arange(-2.0, 2.0, delta)
-
-# X, Y = np.meshgrid(x, y)
-
-# Z1 = np.exp(-X**2 - Y**2)
-# Z2 = np.exp(-(X - 1)**2 - (Y - 1)**2)
-# Z = (Z1 - Z2) * 2
 
 X, Y = np.meshgrid(omega_matters, P_amps)
 Z = np.transpose(delta_lnLs)
@@ -178,36 +151,6 @@ ax.set_title(r'$\Delta \ln L$')
 plt.xlabel(r"$\Omega_m$")
 plt.ylabel(r"$P_{amp}$")
 plt.savefig("contour_plot.png", dpi=500)
-
-
-# %%
-
-plt.figure(dpi=400)
-plt.imshow(delta_lnLs[:,3:8])
-plt.colorbar()
-
-# Where we want the ticks, in pixel locations
-ticks_x = np.linspace(0,4,5)
-ticks_y = np.linspace(0,10,11)
-# What those pixel locations correspond to in data coordinates.
-# Also set the float format here
-# ticklabels_x = ["{:6.2f}".format(i) for i in np.exp(ticks_x/5)]
-# ticklabels_y = ["{:6.2f}".format(i) for i in np.exp(ticks_y/5)]
-ticklabels_x = ["%.1f" % P_amp for P_amp in P_amps[3:8]]
-ticklabels_y = omega_matters
-
-ax = plt.gca()
-ax.set_xticks(ticks_x)
-ax.set_xticklabels(ticklabels_x)
-ax.set_yticks(ticks_y)
-ax.set_yticklabels(ticklabels_y)
-
-plt.xlabel(r"$P_{amp}$")
-plt.ylabel(r"$\Omega_m$")
-plt.title("$\Delta \ln L$")
-plt.savefig("2d_likelihood.png", dpi=400)
-plt.show()
-
 
 
 # %%
@@ -267,29 +210,16 @@ p0 = [omega_m_peak, 0.001]
 params, cov = curve_fit(quadratic, omega_matters, delta_lnL, p0)
 sigma = np.abs(params[1])
 
-
-
-# def quadratic(x, sigma):
-#     return -1/2 * ((x - omega_m_peak)/sigma)**2
-
-# p0 = [0.001]
-# params, cov = curve_fit(quadratic, omega_matters, delta_lnL, p0)
-# sigma = np.abs(params[0])
-
-
 print("σ = %.5f" % sigma)
 
 # %%
 
 plt.figure(dpi=400)
 plt.plot(omega_matters, delta_lnL, ".", label="$\Delta$ ln L", c="#000000")
-# plt.plot(omega_matters, quadratic(omega_matters, *[omega_m_peak, 0.001]), label="Initial guess", c="#70AD47", zorder=0)
 
 x = np.linspace(np.min(omega_matters), np.max(omega_matters), 100)
 plt.plot(x, quadratic(x, *params), label="Gaussian fit", c="#73CF4F", zorder=0)
-# "#6F84F9"
-# #ADB9FC
-# #314ff7
+
 
 # plt.vlines(params[0], np.min(delta_lnL), np.max(delta_lnL), "b", "dotted")
 # plt.text(params[0], (np.min(delta_lnL) + np.max(delta_lnL))/2, "peak", c="b")
@@ -315,6 +245,6 @@ plt.show()
 
 
 print("Result: Ωₘ = %.5f +/- %.5f" % (params[0], sigma))
-# %%
+
 
 # %%
