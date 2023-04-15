@@ -62,6 +62,13 @@ r_max_0 = radii_fiducial[-1]
 
 f_lmn_0 = calc_f_lmn_0(radii_fiducial, all_observed_grids, l_max, k_max, n_max)
 
+
+# Save coefficients to a file for future use
+P_amp = 1
+saveFileName = "data/f_lmn_0_true-%.3f_fiducial-%.3f_l_max-%d_k_max-%.2f_r_max_true-%.3f_R-%.3f_P-amp_%.2f.npy" % (omega_matter_true, omega_matter_0, l_max, k_max, r_max_true, R, P_amp)
+np.save(saveFileName, f_lmn_0)
+print("Done! File saved to", saveFileName)
+
 # %%
 
 # Or, load f_lmn_0 from a file
