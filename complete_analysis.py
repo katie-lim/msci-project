@@ -4,7 +4,7 @@ from scipy.optimize import curve_fit
 from os import path
 
 from generate_field import generateTrueField, multiplyFieldBySelectionFunction
-from utils import calc_n_max_l
+from utils import calc_n_max_l, gaussianPhi
 from precompute_c_ln import get_c_ln_values_without_r_max
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
 from compute_likelihood import calc_all_W, computeLikelihood
@@ -41,6 +41,9 @@ z_true, all_grids = generateTrueField(radii_true, omega_matter_true, r_max_true,
 # %%
 
 # Add the effect of the selection function
+
+def phi(r0):
+    return gaussianPhi(r0, R)
 
 radii_true, all_observed_grids = multiplyFieldBySelectionFunction(radii_true, all_grids, phi)
 
