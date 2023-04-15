@@ -4,12 +4,12 @@ from scipy.optimize import curve_fit
 from os import path
 
 from generate_field import generateTrueField, multiplyFieldBySelectionFunction
+from distance_redshift_relation import *
+from compute_likelihood import calc_all_W, computeLikelihood
+from spherical_bessel_transform import calc_f_lmn_0
 from utils import calc_n_max_l, gaussianPhi
 from precompute_c_ln import get_c_ln_values_without_r_max
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
-from compute_likelihood import calc_all_W, computeLikelihood
-
-from distance_redshift_relation import *
 
 
 l_max = 15
@@ -59,7 +59,9 @@ r_max_0 = radii_fiducial[-1]
 
 # %%
 
+# Perform the spherical Bessel transform to obtain the coefficients
 
+f_lmn_0 = calc_f_lmn_0(radii_fiducial, all_observed_grids, l_max, k_max, n_max)
 
 # %%
 
