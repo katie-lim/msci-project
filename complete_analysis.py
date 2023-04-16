@@ -6,6 +6,7 @@ from generate_field import generateTrueField, multiplyFieldBySelectionFunction
 from distance_redshift_relation import *
 from spherical_bessel_transform import calc_f_lmn_0
 from calculate_W import calc_all_W
+from calculate_SN import calc_all_SN
 from compute_likelihood import computeLikelihood
 from analyse_likelihood import plotContour
 from utils import calc_n_max_l, gaussianPhi
@@ -99,7 +100,7 @@ P_amps = np.linspace(0.95, 1.05, 5)
 likelihoods = np.zeros((np.size(omega_matters), np.size(P_amps)))
 
 # %%
-
+# Compute W's
 for omega_matter in omega_matters:
 
     W_saveFileName = "data/W_no_tayl_exp_zeros_omega_m-%.5f_omega_m_0-%.5f_l_max-%d_k_max-%.2f_r_max_0-%.4f_R-%.3f.npy" % (omega_matter, omega_matter_0, l_max, k_max, r_max_0, R)
@@ -112,6 +113,19 @@ for omega_matter in omega_matters:
         rOfR0 = getInterpolatedR0ofR(omega_matter, omega_matter_0)
         W = calc_all_W(l_max, k_max, r_max_0, r0OfR, rOfR0, phiOfR0)
         np.save(W_saveFileName, W)
+
+
+# Compute shot noise
+SN_saveFileName = "data/SN_no_tayl_exp_zeros_omega_m-%.5f_omega_m_0-%.5f_l_max-%d_k_max-%.2f_r_max_0-%.4f_R-%.3f.npy" % (omega_matter, omega_matter_0, l_max, k_max, r_max_0, R)
+
+if path.exists(SN_saveFileName):
+    SN = np.load(SN_saveFileName)
+else:
+    print("Computing SN for Ωₘ⁰ = %.3f." % omega_matter_0)
+
+    SN = calc_all_SN(l_max, k_max, r_max_0, phiOfR0)
+    np.save(SN_saveFileName, SN)
+
 
 # %%
 

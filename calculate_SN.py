@@ -12,7 +12,7 @@ sphericalBesselZeros = loadSphericalBesselZeros("zeros.csv")
 
 
 
-def calc_all_SN(l_max, k_max, r_max_0, r0OfR, rOfR0, phiOfR0):
+def calc_all_SN(l_max, k_max, r_max_0, phiOfR0):
     # The maximum number of modes is when l=0
     n_max_0 = calc_n_max_l(0, k_max, r_max_0)
 
@@ -25,12 +25,12 @@ def calc_all_SN(l_max, k_max, r_max_0, r0OfR, rOfR0, phiOfR0):
         for n1 in range(n_max_l + 1):
             for n2 in range(n_max_l + 1):
 
-                SN_lnn_prime[l][n1][n2] = calculate_SN(n1, n2, l, r_max_0, r0OfR, rOfR0, phiOfR0, simpson=True, simpsonNpts=1000)
+                SN_lnn_prime[l][n1][n2] = calculate_SN(n1, n2, l, r_max_0, phiOfR0, simpson=True, simpsonNpts=1000)
 
     return SN_lnn_prime
 
 
-def calculate_SN(n, n_prime, l, r_max_0, r0OfR, rOfR0, phiOfR0, simpson=False, simpsonNpts=None):
+def calculate_SN(n, n_prime, l, r_max_0, phiOfR0, simpson=False, simpsonNpts=None):
     """
     Calculate the shot noise, splitting the integral into chunks based on zeros of the integrand.
     """
@@ -39,8 +39,7 @@ def calculate_SN(n, n_prime, l, r_max_0, r0OfR, rOfR0, phiOfR0, simpson=False, s
     k_ln_prime = sphericalBesselZeros[l][n_prime] / r_max_0
 
 
-    def SN_integrand(r):
-        r0 = r0OfR(r)
+    def SN_integrand(r0):
 
         return phiOfR0(r0) * spherical_jn(l, k_ln_prime*r0) * spherical_jn(l, k_ln*r0) * r0*r0
 
