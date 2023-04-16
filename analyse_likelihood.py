@@ -12,14 +12,33 @@ def getDeltaLnL(likelihoods):
     return delta_lnL
 
 
-def plotContour(omega_matters, P_amps, likelihoods, title=""):
+def plotContour(omega_matters, P_amps, likelihoods, title="", truth=None):
     X, Y = np.meshgrid(omega_matters, P_amps)
     delta_lnLs = getDeltaLnL(likelihoods)
     Z = np.transpose(delta_lnLs)
 
     fig, ax = plt.subplots(dpi=500)
-    CS = ax.contour(X, Y, Z)
+    CS = ax.contour(X, Y, Z, [-18.40, -11.80, -9.21, -6.18, -4.61, -2.30, 0])
     ax.clabel(CS, inline=True, fontsize=10)
+
+
+    # Plot the locations of the truth and the peak
+    max_index = np.unravel_index(np.argmax(likelihoods), likelihoods.shape)
+    max_omega_m, max_P_amp = omega_matters[max_index[0]], P_amps[max_index[1]]
+
+
+    yOffset = 7
+
+    if truth:
+        # plt.plot(truth[0], truth[1], "o", ms=4, c="#1071E5")
+        plt.plot(truth[0], truth[1], "o", ms=4)
+        plt.annotate("truth", truth, c="tab:blue", ha="center", xytext=(0, yOffset), textcoords='offset points')
+
+    # plt.plot(max_omega_m, max_P_amp, "o", ms=4,c="#E81313")
+    plt.plot(max_omega_m, max_P_amp, "o", ms=4)
+    plt.annotate("peak", (max_omega_m, max_P_amp), c="tab:orange", ha="center", xytext=(0, yOffset), textcoords='offset points')
+
+
     ax.set_title('$\\Delta \\ln L$\n' + title)
     plt.xlabel(r"$\Omega_m$")
     plt.ylabel(r"$P_{amp}$")

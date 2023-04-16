@@ -157,6 +157,6 @@ z_max = getInterpolatedZofR(omega_matter_0)(r_max_0)
 
 title = "$\Omega_m^{true}$=%.4f\n$\Omega_m^{fiducial}}$=%.4f\n$l_{max}$=%d, $k_{max}$=%.1f, $r_{max}^0$=%.2f ($z_{max}$=%.2f), $R$=%.3f, $n_{max,0}$=%d" % (omega_matter_true, omega_matter_0, l_max, k_max, r_max_0, z_max, R, n_max)
 
-plotContour(omega_matters, P_amps, likelihoods, title)
+plotContour(omega_matters, P_amps, likelihoods, title, truth=[0.315, 1])
 
 # %%
