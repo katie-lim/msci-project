@@ -91,7 +91,7 @@ f_lmn_0 = np.load(saveFileName)
 
 # Calculate likelihood
 
-omega_matters = np.linspace(omega_matter_0 - 0.005, omega_matter_0 + 0.005, 11)
+omega_matters = np.linspace(omega_matter_0 - 0.008, omega_matter_0 + 0.005, 14)
 # P_amps = [1]
 P_amps = np.linspace(0.95, 1.05, 5)
 # omega_matters = np.array([0.315])
