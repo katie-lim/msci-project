@@ -18,7 +18,7 @@ def plotContour(omega_matters, P_amps, likelihoods, title="", truth=None):
     Z = np.transpose(delta_lnLs)
 
     fig, ax = plt.subplots(dpi=500)
-    CS = ax.contour(X, Y, Z, [-18.40, -11.80, -9.21, -6.18, -4.61, -2.30, 0])
+    CS = ax.contour(X, Y, Z, np.array([-18.40, -11.80, -9.21, -6.18, -4.61, -2.30, 0])/2)
     ax.clabel(CS, inline=True, fontsize=10)
 
 
