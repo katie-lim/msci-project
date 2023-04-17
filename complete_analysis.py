@@ -8,7 +8,7 @@ from spherical_bessel_transform import calc_f_lmn_0
 from calculate_W import calc_all_W
 from calculate_SN import calc_all_SN
 from compute_likelihood import computeLikelihood
-from analyse_likelihood import plotContour
+from analyse_likelihood import plotContour, marginaliseOverP
 from utils import calc_n_max_l, gaussianPhi
 from precompute_c_ln import get_c_ln_values_without_r_max
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
@@ -158,5 +158,9 @@ z_max = getInterpolatedZofR(omega_matter_0)(r_max_0)
 title = "$\Omega_m^{true}$=%.4f\n$\Omega_m^{fiducial}}$=%.4f\n$l_{max}$=%d, $k_{max}$=%.1f, $r_{max}^0$=%.2f ($z_{max}$=%.2f), $R$=%.3f, $n_{max,0}$=%d" % (omega_matter_true, omega_matter_0, l_max, k_max, r_max_0, z_max, R, n_max)
 
 plotContour(omega_matters, P_amps, likelihoods, title, truth=[0.315, 1])
+
+# %%
+
+marginaliseOverP(omega_matters, P_amps, likelihoods)
 
 # %%

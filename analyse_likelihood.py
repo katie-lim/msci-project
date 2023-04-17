@@ -45,6 +45,30 @@ def plotContour(omega_matters, P_amps, likelihoods, title="", truth=None):
     # plt.savefig("contour_plot.png", dpi=500)
 
 
+def marginaliseOverP(omega_matters, P_amps, likelihoods):
+    delta_lnLs = getDeltaLnL(likelihoods)
+    Ls = np.exp(delta_lnLs)
+
+    # Marginalise over P_amp
+    results = np.zeros(len(omega_matters))
+
+    for i in range(len(omega_matters)):
+        total = 0
+
+        for j in range(len(P_amps) - 1):
+            total += Ls[i][j] * (P_amps[j+1] - P_amps[j])
+        
+        results[i] = total
+
+    # Plot the results
+    plt.figure(dpi=300)
+    plt.plot(omega_matters, results, ".")
+    plt.xlabel(r"$\Omega_m$")
+    plt.title(r"$L(\Omega_m)$, marginalised over $P_{amp}$")
+    # plt.ylabel("L")
+    plt.show()
+
+
 def analyseLikelihood(omega_matters, likelihoods, omega_matter_true, title):
     # Find the maximum
     peak_index = np.argmax(likelihoods)
@@ -134,3 +158,4 @@ def analyseLikelihood(omega_matters, likelihoods, omega_matter_true, title):
     print("Result: Ωₘ = %.5f +/- %.5f" % (params[0], sigma))
 
     return
+# %%
