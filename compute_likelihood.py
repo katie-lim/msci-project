@@ -13,13 +13,18 @@ sphericalBesselZeros = loadSphericalBesselZeros("zeros.csv")
 
 
 
-def computeExpectation(l, m, n, l_prime, m_prime, n_prime, k_max, r_max, P, W, nbar):
+def computeExpectation(l, m, n, l_prime, m_prime, n_prime, k_max, r_max, P, W, SN, nbar):
+
+    # Note on units
+    # Signal ∝ nbar*nbar
+    # Noise ∝ nbar
+    # To avoid overflow errors, divide all values by nbar*nbar
 
     answer = 0
 
-    # Signal term
     if (l == l_prime and m == m_prime):
 
+        # Signal term
         n_max_l = calc_n_max_l(l, k_max, r_max)
 
         for n_prime_prime in range(n_max_l + 1):
@@ -31,17 +36,14 @@ def computeExpectation(l, m, n, l_prime, m_prime, n_prime, k_max, r_max, P, W, n
             answer += W_n_nprimeprime * np.conj(W_nprime_nprimeprime) * P(k_ln_prime_prime)
 
 
-        # answer *= nbar*nbar
-
-
-    # Shot noise term
-    # answer += nbar * W[l][n][n_prime]
+        # Shot noise term
+        answer += SN[l][n][n_prime] / nbar
 
 
     return answer
 
 
-def computeLikelihood(f_lmn, k_min, k_max, r_max, W, P, nbar):
+def computeLikelihood(f_lmn, k_min, k_max, r_max, W, P, SN, nbar):
     shape = f_lmn.shape
     l_max = shape[0] - 1 # -1 to account for l=0
 
@@ -65,7 +67,7 @@ def computeLikelihood(f_lmn, k_min, k_max, r_max, W, P, nbar):
         for n1 in range(n_min_l, n_max_l + 1):
             for n2 in range(n_min_l, n_max_l + 1):
 
-                sigma_l[n1 - n_min_l][n2 - n_min_l] = computeExpectation(l, 0, n1, l, 0, n2, k_max, r_max, P, W, nbar)
+                sigma_l[n1 - n_min_l][n2 - n_min_l] = computeExpectation(l, 0, n1, l, 0, n2, k_max, r_max, P, W, SN, nbar)
                 # Set l = l' and m = m' = 0 since the expectation does not vary with m
 
 
