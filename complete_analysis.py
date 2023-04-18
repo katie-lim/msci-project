@@ -18,6 +18,7 @@ l_max = 15
 k_max = 200
 r_max_true = 0.75
 n_max = calc_n_max_l(0, k_max, r_max_true) # There are the most modes when l=0
+n_max_ls = np.array([calc_n_max_l(l, k_max, r_max_true) for l in range(l_max + 1)])
 R = 0.25 # Selection function scale length
 # nbar = 5
 
@@ -93,7 +94,7 @@ f_lmn_0 = np.load(saveFileName)
 
 omega_matters = np.linspace(omega_matter_0 - 0.008, omega_matter_0 + 0.005, 14)
 # P_amps = [1]
-P_amps = np.linspace(0.95, 1.05, 5)
+P_amps = np.linspace(0.95, 1.05, 51)
 # omega_matters = np.array([0.315])
 # likelihoods = []
 
@@ -136,15 +137,15 @@ for i, omega_matter in enumerate(omega_matters):
     for j, P_amp in enumerate(P_amps):
         print("Computing likelihood for Ωₘ = %.3f, P_amp = %.2f" % (omega_matter, P_amp))
 
-        def p(k):
-            if k < k_max:
-                return P_amp
-            else:
-                return 0
+        # def p(k):
+        #     if k < k_max:
+        #         return P_amp
+        #     else:
+        #         return 0
 
-        k_min = 0
+
         nbar = 1e9
-        likelihood = computeLikelihood(f_lmn_0, k_min, k_max, r_max_0, W, p, SN, nbar=nbar)
+        likelihood = computeLikelihood(f_lmn_0, n_max_ls, r_max_0, P_amp, W, SN, nbar=nbar)
         likelihoods[i][j] = likelihood
 
 # Convert from complex numbers to floats
