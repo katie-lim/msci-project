@@ -1,144 +1,77 @@
 # %%
 
 import numpy as np
-import matplotlib.pyplot as plt
-from scipy.special import spherical_jn
+from numba import jit
 
-from utils import calc_n_max_l, computeIntegralSplit
+from utils import calc_n_max_l
 from precompute_c_ln import get_c_ln_values_without_r_max
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
-from generate_f_lmn import p
+# from generate_f_lmn import p
 
 
 c_ln_values_without_r_max = get_c_ln_values_without_r_max("c_ln.csv")
 sphericalBesselZeros = loadSphericalBesselZeros("zeros.csv")
 
 
-# omega_matter = 0.5
-# omega_matter_0 = 0.2
+@jit(nopython=True)
+def computeExpectation(l, m, n, l_prime, m_prime, n_prime, n_max_ls, r_max, P_amp, W, SN, nbar):
 
+    # Note on units
+    # Signal ∝ nbar*nbar
+    # Noise ∝ nbar
+    # To avoid overflow errors, divide all values by nbar*nbar
 
-
-# def calc_W(n, n_prime, l, r_max, omega_matter, omega_matter_0, dr_domega):
-#     k_ln = sphericalBesselZeros[l][n] / r_max
-#     k_ln_prime = sphericalBesselZeros[l][n_prime] / r_max
-
-
-#     def W_integrand(r):
-#         return r*r * spherical_jn(l, k_ln_prime*r) * spherical_jn(l, k_ln*r, True) * dr_domega(r)
-
-
-#     d_omega_matter = omega_matter_0 - omega_matter
-
-#     # integral, error = quad(integrand, 0, r_max)
-#     integral = computeIntegralSplit(W_integrand, 10, r_max)
-
-#     return np.power(r_max, -3) * c_ln_values[l][n] * c_ln_values[l][n_prime] * k_ln * d_omega_matter * integral
-
-
-def calc_W_without_delta_omega_m(n, n_prime, l, r_max, dr_domega, Nsplit=10, epsabs=1.49e-8, plotIntegrand=False):
-    k_ln = sphericalBesselZeros[l][n] / r_max
-    k_ln_prime = sphericalBesselZeros[l][n_prime] / r_max
-
-
-    def W_integrand(r):
-        return r*r * spherical_jn(l, k_ln_prime*r) * spherical_jn(l, k_ln*r, True) * dr_domega(r)
-
-    
-    if plotIntegrand:
-        r_vals = np.linspace(0, r_max, 500)
-        plt.figure(dpi=200)
-        plt.plot(r_vals, W_integrand(r_vals))
-        plt.xlabel("r")
-        plt.ylabel("integrand for W^%d_%d,%d" % (l, n, n_prime))
-        plt.show()
-
-
-    # integral, error = quad(integrand, 0, r_max)
-    integral = computeIntegralSplit(W_integrand, Nsplit, r_max, epsabs)
-
-    return np.power(r_max, -3) * c_ln_values_without_r_max[l][n] * c_ln_values_without_r_max[l][n_prime] * k_ln * integral
-
-
-
-def calc_all_Ws_without_delta_omega_m(l_max, k_max, r_max, dr_domega):
-    # The maximum number of modes is when l=0
-    n_max_0 = calc_n_max_l(0, k_max, r_max)
-
-    W_lnn_prime = np.zeros((l_max + 1, n_max_0 + 1, n_max_0 + 1))
-
-    for l in range(l_max + 1):
-        n_max_l = calc_n_max_l(l, k_max, r_max)
-
-        for n1 in range(n_max_l + 1):
-            for n2 in range(n_max_l + 1):
-                W_lnn_prime[l][n1][n2] = calc_W_without_delta_omega_m(n1, n2, l, r_max, dr_domega)
-
-    return W_lnn_prime
-
-
-
-
-def computeExpectation(l, m, n, l_prime, m_prime, n_prime, k_max, r_max, omega_matter, omega_matter_0, P, Ws_without_delta_omega_m):
+    answer = 0
 
     if (l == l_prime and m == m_prime):
 
-        k_ln = sphericalBesselZeros[l][n] / r_max
-        k_ln_prime = sphericalBesselZeros[l][n_prime] / r_max
-
-        answer = 0
-
-        if (n == n_prime):
-            answer += P(k_ln)
-
-        delta_omega_matter = (omega_matter_0 - omega_matter)
-
-        W_nprime_n = Ws_without_delta_omega_m[l][n_prime][n] * delta_omega_matter
-        W_n_nprime = Ws_without_delta_omega_m[l][n][n_prime] * delta_omega_matter
-
-
-        n_max_l = calc_n_max_l(l, k_max, r_max)
-        n_prime_prime_sum = 0
+        # Signal term
+        n_max_l = n_max_ls[l]
 
         for n_prime_prime in range(n_max_l + 1):
             k_ln_prime_prime = sphericalBesselZeros[l][n_prime_prime] / r_max
 
-            n_prime_prime_sum += (Ws_without_delta_omega_m[l][n][n_prime_prime] * delta_omega_matter) * np.conj(Ws_without_delta_omega_m[l][n_prime][n_prime_prime] * delta_omega_matter) * P(k_ln_prime_prime)
+            W_n_nprimeprime = W[l][n][n_prime_prime]
+            W_nprime_nprimeprime = W[l][n_prime][n_prime_prime]
+
+            # answer += W_n_nprimeprime * np.conj(W_nprime_nprimeprime) * P(k_ln_prime_prime)
+            answer += W_n_nprimeprime * np.conj(W_nprime_nprimeprime) * P_amp
 
 
-        answer += W_nprime_n * P(k_ln) + W_n_nprime * P(k_ln_prime) + n_prime_prime_sum
-
-        return answer
-    else:
-        return 0
+        # Shot noise term
+        answer += SN[l][n][n_prime] / nbar
 
 
+    return answer
 
-def computeLikelihood(f_lmn, k_max, r_max, omega_matter, omega_matter_0, Ws_without_delta_omega_m):
+
+@jit(nopython=True)
+def computeLikelihood(f_lmn, n_max_ls, r_max, P_amp, W, SN, nbar):
     shape = f_lmn.shape
     l_max = shape[0] - 1 # -1 to account for l=0
 
     total = 0
 
-    print("Computing likelihood for Ωₘ = %.3f" % omega_matter)
-
 
     for l in range(l_max + 1):
         # print("l =", l)
-        n_max_l = calc_n_max_l(l, k_max, r_max)
+        n_max_l = n_max_ls[l]
+        n_min_l = 0
+        # n_min_l = calc_n_max_l(l, k_min, r_max)
+        # print("l = %d, %d <= n <= %d" % (l, n_min_l, n_max_l))
         
         # Stop if there are no more modes
         if (n_max_l == -1): break
 
 
         # Construct the block of the covariance matrix for this l
-        sigma_l = np.zeros((n_max_l + 1, n_max_l + 1))
+        sigma_l = np.zeros((n_max_l + 1 - n_min_l, n_max_l + 1 - n_min_l))
 
 
-        for n1 in range(n_max_l + 1):
-            for n2 in range(n_max_l + 1):
+        for n1 in range(n_min_l, n_max_l + 1):
+            for n2 in range(n_min_l, n_max_l + 1):
 
-                sigma_l[n1][n2] = computeExpectation(l, 0, n1, l, 0, n2, k_max, r_max, omega_matter, omega_matter_0, p, Ws_without_delta_omega_m)
+                sigma_l[n1 - n_min_l][n2 - n_min_l] = computeExpectation(l, 0, n1, l, 0, n2, n_max_ls, r_max, P_amp, W, SN, nbar)
                 # Set l = l' and m = m' = 0 since the expectation does not vary with m
 
 
@@ -165,13 +98,15 @@ def computeLikelihood(f_lmn, k_max, r_max, omega_matter, omega_matter_0, Ws_with
         # print("det Σ_%d/2:" % l)
         # print(det_sigma_l_half)
 
-        if det_sigma_l < 0 or det_sigma_l_half < 0:
-            print("Determinant is negative:")
-            print("det Σ_%d = %.3e" % (l, det_sigma_l))
+        # if det_sigma_l < 0 or det_sigma_l_half < 0:
+        #     print("Determinant is negative:")
+        #     print("det Σ_%d = %.3e" % (l, det_sigma_l))
 
 
 
         for m in range(l + 1):
+            if (l == 0) and (m == 0): continue
+
             # print("m =", m)
             for re_im in range(2):
                 # For m = 0, the coeffs must be real
@@ -185,16 +120,16 @@ def computeLikelihood(f_lmn, k_max, r_max, omega_matter, omega_matter_0, Ws_with
                 # Handle m = 0 separately
                 # since for m = 0, the coefficients must be real
                 if m == 0:
-                    for n in range(n_max_l + 1):
-                        data_block.append(f_lmn[l][m][n])
+                    for n in range(n_min_l, n_max_l + 1):
+                        data_block.append(np.real(f_lmn[l][m][n]))
                 else:
                     # Real block
                     if re_im == 0:
-                        for n in range(n_max_l + 1):
+                        for n in range(n_min_l, n_max_l + 1):
                             data_block.append(np.real(f_lmn[l][m][n]))
                     # Imag block
                     else:
-                        for n in range(n_max_l + 1):
+                        for n in range(n_min_l, n_max_l + 1):
                             data_block.append(np.imag(f_lmn[l][m][n]))
 
 
@@ -209,9 +144,9 @@ def computeLikelihood(f_lmn, k_max, r_max, omega_matter, omega_matter_0, Ws_with
                 # Now perform the matrix multiplication for this block
 
                 if m == 0:
-                    total += np.matmul(np.transpose(data_block), np.matmul(sigma_l_inv, data_block))
+                    total += np.dot(np.transpose(data_block), np.dot(sigma_l_inv, data_block))
                 else:
-                    total += np.matmul(np.transpose(data_block), np.matmul(sigma_l_inv_half, data_block))
+                    total += np.dot(np.transpose(data_block), np.dot(sigma_l_inv_half, data_block))
 
 
 
@@ -234,102 +169,6 @@ def computeLikelihood(f_lmn, k_max, r_max, omega_matter, omega_matter_0, Ws_with
 
     return lnL
 
-    # likelihood = (1/np.sqrt(2 * np.pi * determinant)) * np.exp((-1/2) * total)
-
-    # return likelihood
-
-
-
-# %%
-
-# calc_W(3, 4, 2, 1, 0.5, 0.2)
-
-# %%
-
-# from generate_f_lmn import p
-
-# computeExpectation(2, 1, 3, 2, 1, 4, 1, 0.5, 0.2, p)
-
-
-# %%
-
-# f_lmn_0_loaded = np.load("f_lmn_0_values_15-11-2022.npy")
-# l_max = 20
-# k_max = 25
-# r_max = 2.5
-# n_max = 20
-# omega_matter = 0.5
-# omega_matter_0 = 0.2
-
-# computeLikelihood(f_lmn_0_loaded, k_max, r_max, omega_matter, omega_matter_0)
-
-# %%
-
-# l = 1
-# print("l =", l)
-# n_max_l = calc_n_max_l(l, k_max, r_max)
-
-# # %%
-
-# # Construct the block of the covariance matrix for this l
-# sigma_l = np.zeros((n_max_l + 1, n_max_l + 1))
-
-# # %%
-
-# for n1 in range(n_max_l + 1):
-#     for n2 in range(n_max_l + 1):
-#         print(n1, n2)
-
-#         sigma_l[n1][n2] = computeExpectation(l, 0, n1, l, 0, n2, k_max, r_max, omega_matter, omega_matter_0, p)
-
-#         print(sigma_l[n1][n2])
-
-
-# %%
-
-# n1, n2 = 0, 2
-
-# computeExpectation(l, 0, n1, l, 0, n2, k_max, r_max, omega_matter, omega_matter_0, p)
-
-# %%
-
-
-# calc_W(n2, n1, 2, r_max, omega_matter, omega_matter_0)
-#* P(k_ln)
-
-#+ calc_W(n, n_prime, l, r_max, omega_matter, omega_matter_0) * P(k_ln_prime)
-
-
-
-
-
-# %%
-
-# n = 1
-# n_prime = 2
-
-# k_ln = sphericalBesselZeros[l][n] / r_max
-# k_ln_prime = sphericalBesselZeros[l][n_prime] / r_max
-
-# dr_domega = getPartialRbyOmegaMatterInterp(omega_matter_0)
-
-# def W_integrand(r):
-#     return r*r * spherical_jn(l, k_ln_prime*r) * spherical_jn(l, k_ln*r, True) * dr_domega(r)
-
-# quad(W_integrand, 0, r_max)
-
-
-# # %%
-# import matplotlib.pyplot as plt
-
-# x = np.linspace(0, r_max, 500)
-# y = [W_integrand(xi) for xi in x]
-
-# plt.plot(x, y)
-
-# # %%
-
-# quad(W_integrand, 0, r_max)
 
 
 # %%

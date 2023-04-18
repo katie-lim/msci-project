@@ -1,9 +1,13 @@
 # %%
 import numpy as np
-from scipy.special import spherical_jn
+import matplotlib.pyplot as plt
 from scipy.integrate import quad, simpson
 from precompute_c_ln import get_c_ln_values_without_r_max
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
+
+import matplotlib as mpl
+from cartopy import crs as ccrs
+
 
 c_ln_values_without_r_max = get_c_ln_values_without_r_max("c_ln.csv")
 sphericalBesselZeros = loadSphericalBesselZeros("zeros.csv")
@@ -56,6 +60,8 @@ def computeIntegralSimpson(integrand, lowerLimit, upperLimit, Npts):
 
 
 def getZerosOfJ_lUpToBoundary(l, upperLimit):
+    # Used to compute integrals for W and SN
+    # by splitting them into chunks based on zeros of integrand
     n = 0
     root = sphericalBesselZeros[l][0]
 
@@ -72,48 +78,10 @@ def getZerosOfJ_lUpToBoundary(l, upperLimit):
         return []
 
 
-def integrateWSplitByZeros(n, n_prime, l, r_max, r0OfR, rOfR0, phiOfR0, simpson=False, simpsonNpts=None):
-    k_ln = sphericalBesselZeros[l][n] / r_max
-    k_ln_prime = sphericalBesselZeros[l][n_prime] / r_max
 
+# Plotting fields
 
-    def W_integrand(r):
-        r0 = r0OfR(r)
-
-        return phiOfR0(r0) * spherical_jn(l, k_ln_prime*r) * spherical_jn(l, k_ln*r0) * r*r
-
-    r_boundary = k_ln_prime * r_max
-    r0_boundary = k_ln * r0OfR(r_max)
-
-    r_zeros = getZerosOfJ_lUpToBoundary(l, r_boundary) / k_ln_prime
-    r0_zeros = getZerosOfJ_lUpToBoundary(l, r0_boundary) / k_ln
-
-    # Convert r0 values to r values
-    r0_zeros = rOfR0(r0_zeros)
-
-    # Combine and sort the zeros
-    zeros = np.sort(np.append(r_zeros, r0_zeros))
-
-    # Remove any duplicate zeros (which occur in the case r = r0)
-    zeros = np.unique(zeros)
-
-
-    integral = 0
-
-    if simpson:
-        for i in range(0, np.size(zeros) - 2):
-            integral += computeIntegralSimpson(W_integrand, zeros[i], zeros[i+1], simpsonNpts)
-    else:
-        for i in range(0, np.size(zeros) - 2):
-            integralChunk, error = quad(W_integrand, zeros[i], zeros[i+1])
-            integral += integralChunk
-
-
-    return np.power(r_max, -3/2) * c_ln_values_without_r_max[l][n_prime] * integral
-
-
-
-def plotField(grid, r_i, r_max, k_max, l_max, lmax_calc):
+def plotFieldOld(grid, r_i, r_max, k_max, l_max, lmax_calc):
 
     title = "r_i = %.2f, r_max = %.2f, k_max = %.2f, l_max = %d, lmax_calc = %d" % (r_i, r_max, k_max, l_max, lmax_calc)
 
@@ -121,3 +89,23 @@ def plotField(grid, r_i, r_max, k_max, l_max, lmax_calc):
 
     fig = grid.plotgmt(projection='mollweide', colorbar='right', title=title)
     fig.show()
+
+
+def plotField(grid, title="", colorbarLabel=r'$\delta(r, \theta, \phi)$', saveFileName=None):
+    mpl.rcParams.update({"axes.grid" : True, "grid.color": "#333333"})
+
+    # i = 500
+    # title = r"$\delta(\mathbf{r})$ at $r$=%.2f" % radii_true[i] + "\n" + "$r_{max}$=%.2f, $k_{max}$=%d, $l_{max}$=%d" % (r_max_true, k_max, l_max)
+
+    fig, ax = grid.plot(
+        projection=ccrs.Mollweide(),
+        colorbar='right',
+        cb_label=colorbarLabel,
+        title=title,
+        grid=True,
+        show=False)
+    
+    if saveFileName:
+        plt.savefig("field.svg", transparent=True, dpi=300)
+
+    plt.show()
