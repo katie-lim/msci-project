@@ -4,7 +4,7 @@ from os import path
 
 from generate_field import generateTrueField, multiplyFieldBySelectionFunction
 from distance_redshift_relation import *
-from spherical_bessel_transform import calc_f_lmn_0
+from spherical_bessel_transform import calc_f_lmn_0, calc_f_lmn_0_numba
 from calculate_W import calc_all_W
 from calculate_SN import calc_all_SN
 from compute_likelihood import computeLikelihood
@@ -64,6 +64,9 @@ r_max_0 = radii_fiducial[-1]
 # Perform the spherical Bessel transform to obtain the coefficients
 
 f_lmn_0 = calc_f_lmn_0(radii_fiducial, all_observed_grids, l_max, k_max, n_max)
+
+# Optionally, use numba to speed up the calculation
+# f_lmn_0 = calc_f_lmn_0_numba(radii_fiducial, all_observed_grids, l_max, k_max, n_max)
 
 
 # Save coefficients to a file for future use
