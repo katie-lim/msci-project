@@ -101,7 +101,7 @@ f_lmn_0 = np.load(saveFileName)
 
 # Calculate likelihood
 
-omega_matters = np.linspace(omega_matter_0 - 0.008, omega_matter_0 + 0.005, 14)
+omega_matters = np.linspace(omega_matter_0 - 0.008, omega_matter_0 + 0.005, 27)
 # P_amps = [1]
 P_amps = np.linspace(0.95, 1.05, 51)
 # omega_matters = np.array([0.315])
@@ -118,7 +118,7 @@ for omega_matter in omega_matters:
     if path.exists(W_saveFileName):
         W = np.load(W_saveFileName)
     else:
-        print("Computing W's for Ωₘ = %.3f." % omega_matter)
+        print("Computing W's for Ωₘ = %.4f." % omega_matter)
 
         r0_vals, r_vals = getInterpolatedR0ofRValues(omega_matter_0, omega_matter)
         W_integrand_numba = make_W_integrand_numba(phiOfR0)
@@ -136,7 +136,7 @@ SN_saveFileName = "data/SN_no_tayl_exp_zeros_omega_m-%.5f_omega_m_0-%.5f_l_max-%
 if path.exists(SN_saveFileName):
     SN = np.load(SN_saveFileName)
 else:
-    print("Computing SN for Ωₘ⁰ = %.3f." % omega_matter_0)
+    print("Computing SN for Ωₘ⁰ = %.4f." % omega_matter_0)
 
     SN = calc_all_SN(l_max, k_max, r_max_0, phiOfR0)
     np.save(SN_saveFileName, SN)
