@@ -204,14 +204,14 @@ with Pool() as pool:
 
     # Set up the backend
     # Clear it in case the file already exists
-    filename = "parametrised_power_spectrum_4_MH.h5"
+    filename = "parametrised_power_spectrum_4.h5"
     backend = emcee.backends.HDFBackend(filename)
     backend.reset(nwalkers, ndim)
 
     # To use MH, use moves=emcee.moves.GaussianMove(0.00005)
 
     sampler = emcee.EnsembleSampler(
-        nwalkers, ndim, log_probability, pool=pool
+        nwalkers, ndim, log_probability, pool=pool, backend=backend
     )
     sampler.run_mcmc(pos, 10000, progress=True);
 
