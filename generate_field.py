@@ -45,12 +45,12 @@ def calcSphHarmCoeffs(r_i, l_max, k_max, r_max, f_lmn):
     return cilm
 
 
-def generateTrueField(radii_true, omega_matter_true, r_max_true, l_max, k_max):
+def generateTrueField(radii_true, omega_matter_true, r_max_true, l_max, k_max, P):
     """
     Generates a field f(z, theta, phi).
     """
 
-    f_lmn_true = generate_f_lmn(l_max, r_max_true, k_max)
+    f_lmn_true = generate_f_lmn(l_max, r_max_true, k_max, P)
 
     true_z_of_r = getInterpolatedZofR(omega_matter_true)
     z_true = true_z_of_r(radii_true)
