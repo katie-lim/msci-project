@@ -5,11 +5,11 @@ from os import path
 
 from generate_field import generateTrueField, multiplyFieldBySelectionFunction
 from distance_redshift_relation import *
-from spherical_bessel_transform import calc_f_lmn_0, calc_f_lmn_0_numba
-from calculate_W import calc_all_W, calc_all_W_numba, make_W_integrand_numba
+from spherical_bessel_transform import calc_f_lmn_0_numba
+from calculate_W import calc_all_W_numba, make_W_integrand_numba, interpolate_W_values
 from calculate_SN import calc_all_SN
-from compute_likelihood import computeLikelihood
-from analyse_likelihood import plotContour, marginaliseOverP
+from compute_likelihood import computeLikelihoodMCMC
+from analyse_likelihood import plotContour, plotPosterior
 from utils import calc_n_max_l, gaussianPhi
 from precompute_c_ln import get_c_ln_values_without_r_max
 from precompute_sph_bessel_zeros import loadSphericalBesselZeros
@@ -39,7 +39,13 @@ z_true = true_z_of_r(radii_true)
 
 # %%
 
-z_true, all_grids = generateTrueField(radii_true, omega_matter_true, r_max_true, l_max, k_max)
+def P(k):
+    if k < k_max:
+        return 1
+    else:
+        return 0
+
+z_true, all_grids = generateTrueField(radii_true, omega_matter_true, r_max_true, l_max, k_max, P)
 
 # %%
 
@@ -102,12 +108,10 @@ f_lmn_0 = np.load(saveFileName)
 # Calculate likelihood
 
 omega_matters = np.linspace(omega_matter_0 - 0.008, omega_matter_0 + 0.005, 27)
-# P_amps = [1]
+omega_matters_inference = np.linspace(omega_matter_0 - 0.007, omega_matter_0 + 0.005, 97)
 P_amps = np.linspace(0.95, 1.05, 51)
-# omega_matters = np.array([0.315])
-# likelihoods = []
 
-likelihoods = np.zeros((np.size(omega_matters), np.size(P_amps)))
+likelihoods = np.zeros((np.size(omega_matters_inference), np.size(P_amps)))
 
 # %%
 # Compute W's
@@ -141,29 +145,34 @@ else:
     SN = calc_all_SN(l_max, k_max, r_max_0, phiOfR0)
     np.save(SN_saveFileName, SN)
 
-
 # %%
+
+# We wish to evaluate the likelihood for arbitrary values of Ωₘ
+# so interpolate W^l_nn' (Ωₘ)
+
+Ws = []
 
 for i, omega_matter in enumerate(omega_matters):
     W_saveFileName = "data/W_no_tayl_exp_zeros_omega_m-%.5f_omega_m_0-%.5f_l_max-%d_k_max-%.2f_r_max_0-%.4f_R-%.3f.npy" % (omega_matter, omega_matter_0, l_max, k_max, r_max_0, R)
     W = np.load(W_saveFileName)
 
+    Ws.append(W)
+
+step = 0.00001
+omega_matters_interp, Ws_interp = interpolate_W_values(l_max, n_max_ls, omega_matters, Ws, step=step)
+
+omega_matter_min, omega_matter_max = omega_matters_interp[0], omega_matters_interp[-1]
+
+# %%
+
+for i, omega_matter in enumerate(omega_matters_inference):
+
     for j, P_amp in enumerate(P_amps):
         print("Computing likelihood for Ωₘ = %.3f, P_amp = %.2f" % (omega_matter, P_amp))
 
-        # def p(k):
-        #     if k < k_max:
-        #         return P_amp
-        #     else:
-        #         return 0
-
-
         nbar = 1e9
-        likelihood = computeLikelihood(f_lmn_0, n_max_ls, r_max_0, P_amp, W, SN, nbar=nbar)
+        likelihood = computeLikelihoodMCMC(f_lmn_0, n_max_ls, r_max_0, omega_matter, P_amp, omega_matters_interp, Ws_interp, SN, nbar)
         likelihoods[i][j] = likelihood
-
-# Convert from complex numbers to floats
-# likelihoods = np.real(likelihoods)
 
 # %%
 
@@ -173,11 +182,11 @@ z_max = getInterpolatedZofR(omega_matter_0)(r_max_0)
 
 title = "$\Omega_m^{true}$=%.4f\n$\Omega_m^{fiducial}}$=%.4f\n$l_{max}$=%d, $k_{max}$=%.1f, $r_{max}^0$=%.2f ($z_{max}$=%.2f), $R$=%.3f, $n_{max,0}$=%d, $\\bar{n}$=%.1e" % (omega_matter_true, omega_matter_0, l_max, k_max, r_max_0, z_max, R, n_max, nbar)
 
-plotContour(omega_matters, P_amps, likelihoods, title, truth=[0.315, 1])
+plotContour(omega_matters_inference, P_amps, likelihoods, title, truth=[0.315, 1])
 
 # %%
 
-marginaliseOverP(omega_matters, P_amps, likelihoods)
+plotPosterior(omega_matters_inference, P_amps, likelihoods)
 
 # %%
 

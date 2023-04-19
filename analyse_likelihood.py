@@ -2,6 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
+from scipy.integrate import simpson
 
 
 def getDeltaLnL(likelihoods):
@@ -60,13 +61,82 @@ def marginaliseOverP(omega_matters, P_amps, likelihoods):
         
         results[i] = total
 
+    return results
+
+
+def plotPosterior(omega_matters, P_amps, likelihoods):
+    omega_likelihoods = marginaliseOverP(omega_matters, P_amps, likelihoods)
+
+    # Normalise to obtain PDF
+    norm = simpson(omega_likelihoods, omega_matters)
+    omega_probs = omega_likelihoods / norm
+
+    # Locate peak and HPDI
+    peak_index = np.argmax(omega_probs)
+    lower_index, upper_index = findHighestPosteriorDensity(omega_matters, P_amps, likelihoods)
+
+
     # Plot the results
     plt.figure(dpi=300)
-    plt.plot(omega_matters, results, ".")
+    plt.plot(omega_matters, omega_probs, ".")
+    plt.vlines(omega_matters[peak_index], 0, omega_probs[peak_index], linestyles="dotted", color="tab:orange")
+    plt.vlines(omega_matters[lower_index], 0, omega_probs[lower_index], linestyles="dotted", color="tab:orange")
+    plt.vlines(omega_matters[upper_index], 0, omega_probs[upper_index], linestyles="dotted", color="tab:orange")
+
     plt.xlabel(r"$\Omega_m$")
-    plt.title(r"$L(\Omega_m)$, marginalised over $P_{amp}$")
-    # plt.ylabel("L")
+    plt.ylabel(r"$p(\Omega_m)$")
+    plt.title(r"$p(\Omega_m)$, marginalised over $P_{amp}$")
     plt.show()
+
+    upper_sigma = omega_matters[upper_index] - omega_matters[peak_index]
+    lower_sigma = omega_matters[peak_index] - omega_matters[lower_index]
+    print("Ωₘ = %.5f +%.5f -%.5f" % (omega_matters[peak_index], upper_sigma, lower_sigma))
+
+
+def findHighestPosteriorDensity(omega_matters, P_amps, likelihoods, level=0.68):
+    """
+    Find the highest posterior density interval (HPDI).
+
+    Returns the indices of the lower and upper bounds of the HPDI in the omega_matters array.
+    """
+
+    omega_likelihoods = marginaliseOverP(omega_matters, P_amps, likelihoods)
+
+    # Normalise to obtain PDF
+    norm = simpson(omega_likelihoods, omega_matters)
+    omega_probs = omega_likelihoods / norm
+
+    # Find the HPDI
+    def probabilityContained(height):
+        above = omega_probs >= height
+
+        x = omega_matters[above]
+        y = omega_probs[above]
+
+        return simpson(y, x)
+    
+    # Find the height where probabilityContained = level
+    max_height = np.max(omega_probs)
+    a = np.linspace(0.3*max_height, 0.9*max_height, 100)
+    b = np.array([probabilityContained(height) for height in a])
+
+    height_index = np.argmin(np.abs((b - level)))
+    height = a[height_index]
+
+    # plt.plot(a, b, '.')
+    # print(height)
+
+
+    # Find the values of omega_m where p(Ωₘ) = height
+    peak_index = np.argmax(omega_probs)
+    first_half = omega_probs[:peak_index]
+    second_half = omega_probs[peak_index:]
+
+    lower_bound = np.argmin(np.abs(first_half - height))
+    upper_bound = np.argmin(np.abs(second_half - height)) + np.size(first_half)
+
+    return (lower_bound, upper_bound)
+
 
 
 def analyseLikelihood(omega_matters, likelihoods, omega_matter_true, title):
