@@ -2,6 +2,7 @@
 import numpy as np
 from numba import jit
 from os import path
+from multiprocessing import Pool
 
 from generate_field import generateTrueField, multiplyFieldBySelectionFunction
 from distance_redshift_relation import *
@@ -181,13 +182,14 @@ def log_probability(theta):
     return lp + log_likelihood(theta)
 
 
-pos = np.array([0.315, 1.0]) + 1e-4 * np.random.randn(32, 2)
-nwalkers, ndim = pos.shape
+with Pool() as pool:
+    pos = np.array([0.315, 1.0]) + 1e-4 * np.random.randn(32, 2)
+    nwalkers, ndim = pos.shape
 
-sampler = emcee.EnsembleSampler(
-    nwalkers, ndim, log_probability
-)
-sampler.run_mcmc(pos, 5000, progress=True);
+    sampler = emcee.EnsembleSampler(
+        nwalkers, ndim, log_probability, pool=pool
+    )
+    sampler.run_mcmc(pos, 100, progress=True);
 
 # %%
 
