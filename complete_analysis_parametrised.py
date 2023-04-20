@@ -204,7 +204,7 @@ with Pool() as pool:
 
     # Set up the backend
     # Clear it in case the file already exists
-    filename = "parametrised_power_spectrum_4.h5"
+    filename = "data/parametrised_power_spectrum_5.h5"
     backend = emcee.backends.HDFBackend(filename)
     backend.reset(nwalkers, ndim)
 
