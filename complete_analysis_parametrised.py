@@ -40,7 +40,7 @@ z_true = true_z_of_r(radii_true)
 
 # %%
 
-k_bin_edges, k_bin_heights = create_power_spectrum(200, 5, np.array([0.35, 0.85, 1, 0.85, 0.35]))
+k_bin_edges, k_bin_heights = create_power_spectrum(200, 10, np.array([0.1, 0.35, 0.6, 0.8, 0.9, 1, 0.95, 0.85, 0.7, 0.3]))
 
 k_vals = np.linspace(0, 400, 1000)
 P_vals = [P_parametrised(k, k_bin_edges, k_bin_heights) for k in k_vals]
@@ -88,7 +88,7 @@ f_lmn_0 = calc_f_lmn_0_numba(radii_fiducial, all_observed_grids, l_max, k_max, n
 
 
 # Save coefficients to a file for future use
-saveFileName = "data/f_lmn_0_true-%.3f_fiducial-%.3f_l_max-%d_k_max-%.2f_r_max_true-%.3f_R-%.3f_P-parametrised-2023-04-19-4.npy" % (omega_matter_true, omega_matter_0, l_max, k_max, r_max_true, R)
+saveFileName = "data/f_lmn_0_true-%.3f_fiducial-%.3f_l_max-%d_k_max-%.2f_r_max_true-%.3f_R-%.3f_P-parametrised-2023-04-20-10-bins.npy" % (omega_matter_true, omega_matter_0, l_max, k_max, r_max_true, R)
 np.save(saveFileName, f_lmn_0)
 print("Done! File saved to", saveFileName)
 
@@ -105,7 +105,7 @@ P_amp = 1
 
 saveFileName = "data/f_lmn_0_true-%.3f_fiducial-%.3f_l_max-%d_k_max-%.2f_r_max_true-%.3f_R-%.3f_P-amp_%.2f.npy" % (omega_matter_true, omega_matter_0, l_max, k_max, r_max_true, R, P_amp)
 
-saveFileName = "data/f_lmn_0_true-0.315_fiducial-0.315_l_max-15_k_max-200.00_r_max_true-0.750_R-0.250_P-parametrised-2023-04-19.npy"
+saveFileName = "data/f_lmn_0_true-0.315_fiducial-0.315_l_max-15_k_max-200.00_r_max_true-0.750_R-0.250_P-parametrised-2023-04-20-10-bins.npy"
 
 f_lmn_0 = np.load(saveFileName)
 
@@ -199,12 +199,12 @@ def log_probability(theta):
 # %%
 
 with Pool() as pool:    
-    pos = np.array([0.315, *k_bin_heights]) + 1e-4 * np.random.randn(32, 6)
+    pos = np.array([0.315, *k_bin_heights]) + 1e-4 * np.random.randn(32, 11)
     nwalkers, ndim = pos.shape
 
     # Set up the backend
     # Clear it in case the file already exists
-    filename = "data/parametrised_power_spectrum_5.h5"
+    filename = "data/parametrised_power_spectrum_10_bins.h5"
     backend = emcee.backends.HDFBackend(filename)
     backend.reset(nwalkers, ndim)
 
@@ -213,14 +213,14 @@ with Pool() as pool:
     sampler = emcee.EnsembleSampler(
         nwalkers, ndim, log_probability, pool=pool, backend=backend
     )
-    sampler.run_mcmc(pos, 10000, progress=True);
+    sampler.run_mcmc(pos, 25000, progress=True);
 
 
 # %%
 
-fig, axes = plt.subplots(6, figsize=(10, 7), sharex=True)
+fig, axes = plt.subplots(11, figsize=(10, 7), sharex=True)
 samples = sampler.get_chain()
-labels = ["$\Omega_m$", *["$P_%d$" % (i+1) for i in range(5)]]
+labels = ["$\Omega_m$", *["$P_%d$" % (i+1) for i in range(10)]]
 for i in range(ndim):
     ax = axes[i]
     ax.plot(samples[:, :, i], "k", alpha=0.3)
@@ -245,7 +245,8 @@ flat_samples = sampler.get_chain(discard=100, flat=True)
 print(flat_samples.shape)
 
 fig = corner.corner(
-    flat_samples, labels=labels, truths=[0.315, *[0.35, 0.85, 1, 0.85, 0.35]]
+    flat_samples, labels=labels, truths=[0.315, *[0.1, 0.35, 0.6, 0.8, 0.9, 1, 0.95, 0.85, 0.7, 0.3]]
+    # flat_samples, labels=labels, truths=[0.315, *[0.35, 0.85, 1, 0.85, 0.35]]
 );
 
 
