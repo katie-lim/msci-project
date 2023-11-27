@@ -158,6 +158,7 @@ def calc_all_W_numba(l_max, k_max, r_max, r0_vals, r_vals, W_integrand_numba):
 
 
     for l in range(l_max + 1):
+        print("l = %d" % l)
         n_max_l = calc_n_max_l(l, k_max, r_max)
 
         for n1 in range(n_max_l + 1):
